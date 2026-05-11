@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles/style(Guest,Home).css">
+    <title>Healthcare Management System</title>
+</head>
+
+<body class="guest_body">
+    <div class="navbar">
+        <div class="logo">
+            <img src="images/logo.png" alt="">
+            <div class="logo_definition">
+                <h1>Healthcare Management System</h1>
+            </div>
+        </div>
+
+        <div class="login_signup">
+            <a href="Welcome.html"><button>Login</button></a>
+            <a href="Signup.html"><button>Sign Up</button></a>
+        </div>
+    </div>
+
+    <div class="introduction">
+        <h1>Public Access</h1>
+        <p>The backend currently exposes authentication, cookie sessions, and the signed-in dashboard.</p>
+    </div>
+
+    <div class="available_doctors">
+        <article class="doctor_card">
+            <div class="doctor_card_header">
+                <div>
+                    <h3>Authentication ready</h3>
+                    <p>Register, login, and session cookies are wired to the backend.</p>
+                </div>
+                <span class="doctor_badge available">Live</span>
+            </div>
+            <div class="doctor_card_body">
+                <p><strong>Try:</strong> create a patient or doctor account, then log in.</p>
+                <p><strong>Next:</strong> the dashboard will confirm your session through <code>/auth/me</code>.</p>
+            </div>
+        </article>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin && window.location.origin !== 'null'
+            ? window.location.origin
+            : 'http://localhost:8080';
+
+        async function checkSession() {
+            try {
+                const response = await fetch(`${API_URL}/auth/me`, {
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    window.location.href = 'Home.html';
+                }
+            } catch (error) {
+                // stay public
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', checkSession);
+    </script>
+</body>
+
+</html>

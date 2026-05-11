@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Management System</title>
+    <link rel="stylesheet" href="styles/style(Guest,Home).css">
+</head>
+
+<body class="home_body">
+    <div class="sidebar">
+        <div class="logo">
+            <img src="images/logo.png" alt="">
+            <h4>HealthCare Management System</h4>
+        </div>
+
+        <div class="profile">
+            <img src="images/logo.png" alt="">
+            <div class="profile_name">
+                <h4 id="sidebarUserName">Loading...</h4>
+                <p id="sidebarUserRole">Session</p>
+            </div>
+        </div>
+
+        <div class="navbar">
+            <button id="homeBtn" type="button">Home</button>
+            <button id="sessionBtn" type="button">Session</button>
+        </div>
+
+        <div class="logout">
+            <a href="#" id="logoutBtn">Logout</a>
+        </div>
+    </div>
+
+    <section class="home_content">
+        <div class="welcome">
+            <div class="welcome_message">
+                <h1 id="welcomeMessage">Welcome</h1>
+                <p>Your session is stored in a cookie and verified through <code>/auth/me</code>.</p>
+            </div>
+        </div>
+
+        <div class="trust" id="sessionCards">
+            <div class="trust_item">
+                <h3>Status</h3>
+                <p id="sessionState">Loading...</p>
+            </div>
+            <div class="trust_item">
+                <h3>Account</h3>
+                <p id="accountId">-</p>
+            </div>
+            <div class="trust_item">
+                <h3>Email</h3>
+                <p id="accountEmail">-</p>
+            </div>
+            <div class="trust_item">
+                <h3>Role</h3>
+                <p id="accountRole">-</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const API_URL = window.location.origin && window.location.origin !== 'null'
+            ? window.location.origin
+            : 'http://localhost:8080';
+
+        async function requireSession() {
+            const response = await fetch(`${API_URL}/auth/me`, {
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                window.location.href = 'Welcome.html';
+                return null;
+            }
+
+            return response.json();
+        }
+
+        async function loadSession() {
+            const session = await requireSession();
+            if (!session) {
+                return;
+            }
+
+            const roleLabel = session.role.charAt(0).toUpperCase() + session.role.slice(1);
+
+            document.getElementById('sidebarUserName').textContent = session.email;
+            document.getElementById('sidebarUserRole').textContent = roleLabel;
+            document.getElementById('welcomeMessage').textContent = `Welcome, ${session.email}!`;
+            document.getElementById('sessionState').textContent = 'Signed in and verified by the backend.';
+            document.getElementById('accountId').textContent = `Account ID: ${session.account_id}`;
+            document.getElementById('accountEmail').textContent = session.email;
+            document.getElementById('accountRole').textContent = roleLabel;
+        }
+
+        async function handleLogout(event) {
+            event.preventDefault();
+
+            await fetch(`${API_URL}/auth/logout`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+
+            window.location.href = 'Welcome.html';
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+        document.getElementById('homeBtn').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+        document.getElementById('sessionBtn').addEventListener('click', async () => {
+            const session = await requireSession();
+            if (session) {
+                alert(`Signed in as ${session.email} (${session.role})`);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', loadSession);
+    </script>
+</body>
+
+</html>
