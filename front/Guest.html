@@ -4,67 +4,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles/style(Guest,Home).css">
-    <title>Healthcare Management System</title>
+    <meta name="description" content="Public access page for the Healthcare Management System. Browse services and view public doctor queue information before signing in.">
+    <link rel="stylesheet" href="styles/style(Guest).css">
+    <title>Public access - Healthcare Management System</title>
 </head>
 
 <body class="guest_body">
-    <div class="navbar">
-        <div class="logo">
-            <img src="images/logo.png" alt="">
-            <div class="logo_definition">
-                <h1>Healthcare Management System</h1>
-            </div>
-        </div>
+    <a class="skip_link" href="#mainContent">Skip to content</a>
 
-        <div class="login_signup">
-            <a href="Welcome.html"><button>Login</button></a>
-            <a href="Signup.html"><button>Sign Up</button></a>
-        </div>
-    </div>
+    <header class="guest_navbar" aria-label="Public navigation">
+        <a class="brand" href="Guest.html" aria-label="Healthcare Management System home">
+            <img src="images/logo.png" alt="Healthcare Management System logo">
+            <span>Healthcare Management System</span>
+        </a>
 
-    <div class="introduction">
-        <h1>Public Access</h1>
-        <p>The backend currently exposes authentication, cookie sessions, and the signed-in dashboard.</p>
-    </div>
+        <nav class="nav_actions" aria-label="Account actions">
+            <a class="nav_link" href="#doctorQueues">Doctor queues</a>
+            <a class="btn btn_secondary" href="Welcome.html">Login</a>
+            <a class="btn btn_primary" href="Signup.html">Sign up</a>
+        </nav>
+    </header>
 
-    <div class="available_doctors">
-        <article class="doctor_card">
-            <div class="doctor_card_header">
-                <div>
-                    <h3>Authentication ready</h3>
-                    <p>Register, login, and session cookies are wired to the backend.</p>
+    <main id="mainContent" class="guest_shell">
+        <section class="hero_section" aria-labelledby="heroTitle">
+            <div class="hero_copy">
+                <p class="eyebrow">Public access</p>
+                <h1 id="heroTitle">Check clinic queues before signing in.</h1>
+                <p class="hero_text">
+                    Guests can view public doctor queues, browse available services, and create an account when they are ready to book or manage appointments.
+                </p>
+
+                <div class="hero_actions" aria-label="Primary actions">
+                    <a class="btn btn_primary btn_large" href="#doctorQueues">View all queues</a>
+                    <a class="btn btn_ghost btn_large" href="Signup.html">Create account</a>
                 </div>
-                <span class="doctor_badge available">Live</span>
             </div>
-            <div class="doctor_card_body">
-                <p><strong>Try:</strong> create a patient or doctor account, then log in.</p>
-                <p><strong>Next:</strong> the dashboard will confirm your session through <code>/auth/me</code>.</p>
+        </section>
+
+        <section id="doctorQueues" class="queues_section" aria-labelledby="queuesTitle">
+            <div class="section_header">
+                <div>
+                    <p class="eyebrow">Queue board</p>
+                    <h2 id="queuesTitle">All doctor queues</h2>
+                </div>
+                <p>Public queue information is shown with ticket numbers only. Patients must sign in to see personal appointments.</p>
             </div>
-        </article>
-    </div>
 
-    <script>
-        const API_URL = window.location.origin && window.location.origin !== 'null'
-            ? window.location.origin
-            : 'http://localhost:8080';
+            <div class="queue_toolbar" aria-label="Queue controls">
+                <label class="search_box" for="queueSearch">
+                    <span>Search doctor or speciality</span>
+                    <input type="search" id="queueSearch" placeholder="Search queues...">
+                </label>
 
-        async function checkSession() {
-            try {
-                const response = await fetch(`${API_URL}/auth/me`, {
-                    credentials: 'include'
-                });
+                <label class="select_box" for="statusFilter">
+                    <span>Status</span>
+                    <select id="statusFilter">
+                        <option value="all">All statuses</option>
+                        <option value="in-progress">In progress</option>
+                        <option value="waiting">Waiting</option>
+                        <option value="finished">Finished</option>
+                    </select>
+                </label>
+            </div>
 
-                if (response.ok) {
-                    window.location.href = 'Home.html';
-                }
-            } catch (error) {
-                // stay public
-            }
-        }
+            <div class="doctor_queue_grid" id="doctorQueueGrid" aria-label="Doctor queue summaries"></div>
 
-        document.addEventListener('DOMContentLoaded', checkSession);
-    </script>
+            <div class="queue_board" aria-live="polite">
+                <div class="queue_board_header">
+                    <div>
+                        <p class="eyebrow">Read-only public view</p>
+                        <h3 id="queueTableTitle">All active queue entries</h3>
+                    </div>
+                    <span id="queueResultCount" class="queue_count">0 entries</span>
+                </div>
+
+                <div class="queue_table_wrap">
+                    <table class="queue_table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Doctor</th>
+                                <th scope="col">Speciality</th>
+                                <th scope="col">Position</th>
+                                <th scope="col">Time</th>
+                                <th scope="col">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="queueTableBody"></tbody>
+                    </table>
+                </div>
+
+                <p id="emptyQueueMessage" class="empty_state" hidden>No queue entries match your search.</p>
+            </div>
+        </section>
+
+        <section class="specialties_section" aria-labelledby="specialtiesTitle">
+            <div class="section_header">
+                <div>
+                    <p class="eyebrow">Available paths</p>
+                    <h2 id="specialtiesTitle">Common services</h2>
+                </div>
+                <p>These services are available for signed-in booking and queue tracking.</p>
+            </div>
+
+            <div class="specialty_grid">
+                <article class="specialty_card">
+                    <img src="images/Cardiology.png" alt="Cardiology service icon">
+                    <div>
+                        <h3>Cardiology</h3>
+                        <p>Heart and blood vessel care with appointment queue tracking.</p>
+                    </div>
+                </article>
+
+                <article class="specialty_card">
+                    <img src="images/Neurology.png" alt="Neurology service icon">
+                    <div>
+                        <h3>Neurology</h3>
+                        <p>Brain and nervous system consultations with specialist routing.</p>
+                    </div>
+                </article>
+
+                <article class="specialty_card">
+                    <img src="images/Orthopedics.png" alt="Orthopedics service icon">
+                    <div>
+                        <h3>Orthopedics</h3>
+                        <p>Bone, joint, and muscle care for scheduled clinic visits.</p>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="preview_section" aria-labelledby="previewTitle">
+            <div class="preview_panel">
+                <div>
+                    <p class="eyebrow">Signed-in dashboard</p>
+                    <h2 id="previewTitle">What unlocks after login</h2>
+                </div>
+
+                <div class="feature_list">
+                    <article>
+                        <span>01</span>
+                        <h3>Book appointments</h3>
+                        <p>Select a speciality, choose a doctor, and reserve a session.</p>
+                    </article>
+                    <article>
+                        <span>02</span>
+                        <h3>Track your own queue position</h3>
+                        <p>See your exact reservation, number, and doctor queue.</p>
+                    </article>
+                    <article>
+                        <span>03</span>
+                        <h3>Manage your profile</h3>
+                        <p>Keep contact details, insurance information, and patient records updated.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/guest.js"></script>
 </body>
 
 </html>

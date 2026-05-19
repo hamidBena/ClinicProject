@@ -4,123 +4,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles/style.css">
+    <meta name="description" content="Sign in to the Healthcare Management System to manage appointments, sessions, and patient dashboard access.">
+    <link rel="stylesheet" href="styles/style(Welcome).css">
     <title>Login - Healthcare Management System</title>
 </head>
 
 <body class="welcome_body">
-    <div class="definition_section">
-        <div class="logo">
-            <img src="images/logo.png" alt="">
-            <div class="logo_definition">
-                <h2>HealthCare Management System</h2>
-                <p>Your trusted partner in healthcare management</p>
-            </div>
-        </div>
+    <a class="skip_link" href="#loginForm">Skip to login form</a>
 
-        <div class="introduction">
-            <h1>Managing Appointments <br><span style="color: aqua;">& Sessions</span></h1>
-            <p>Sign in to access your authenticated dashboard and cookie-based session.</p>
-        </div>
+    <main class="welcome_shell">
+        <section class="definition_section" aria-label="Healthcare Management System introduction">
+            <header class="logo">
+                <img src="images/logo.png" alt="Healthcare Management System logo">
+                <div class="logo_definition">
+                    <h2>HealthCare Management System</h2>
+                    <p>Appointments, sessions, and patient access in one place.</p>
+                </div>
+            </header>
 
-        <div class="enter_as_a_guest">
-            <h4>Just Browsing?</h4>
-            <p>Open the guest page without signing in.</p>
-            <a href="Guest.html"><button>Continue as Guest -></button></a>
-        </div>
-    </div>
-
-    <div class="login_section">
-        <div class="input_form">
-            <div class="input_title">
-                <h2>Welcome Back</h2>
-                <p>Sign in to your account</p>
+            <div class="introduction">
+                <p class="eyebrow">Patient access portal</p>
+                <h1>Manage appointments <span>&amp; sessions</span></h1>
+                <p>
+                    Sign in to open your secure dashboard, review reservations, track queue status,
+                    and keep your healthcare profile up to date.
+                </p>
             </div>
 
-            <form id="loginForm" onsubmit="handleLogin(event)">
-                <div class="inputs">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" placeholder="your@email.com" required>
+            <div class="welcome_metrics" aria-label="Platform highlights">
+                <article>
+                    <strong>24/7</strong>
+                    <span>dashboard access</span>
+                </article>
+                <article>
+                    <strong>Fast</strong>
+                    <span>appointment booking</span>
+                </article>
+                <article>
+                    <strong>Private</strong>
+                    <span>session handling</span>
+                </article>
+            </div>
+
+            <aside class="enter_as_a_guest" aria-label="Guest access">
+                <div>
+                    <h4>Just browsing?</h4>
+                    <p>Open the guest page and explore available doctors without signing in.</p>
+                </div>
+                <a class="guest_link" href="Guest.html">Continue as guest <span aria-hidden="true">→</span></a>
+            </aside>
+        </section>
+
+        <section class="login_section" aria-labelledby="loginTitle">
+            <div class="input_form">
+                <div class="input_title">
+                    <p class="eyebrow">Secure sign in</p>
+                    <h1 id="loginTitle">Welcome back</h1>
+                    <p>Use your registered email and password to continue.</p>
                 </div>
 
-                <div class="inputs">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" placeholder="Password" required>
-                </div>
+                <form id="loginForm" novalidate>
+                    <div class="inputs">
+                        <label for="email">Email address</label>
+                        <input type="email" id="email" name="email" placeholder="your@email.com" autocomplete="email" required>
+                    </div>
 
-                <button type="submit" id="loginBtn">Login</button>
-                <p id="errorMsg" style="color: red; display: none;"></p>
-            </form>
+                    <div class="inputs">
+                        <div class="label_row">
+                            <label for="password">Password</label>
+                            <a href="ForgotPassword.html">Forgot password?</a>
+                        </div>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" autocomplete="current-password" required>
+                    </div>
 
-            <p>Don't have an account? <a href="Signup.html">Sign Up</a></p>
-        </div>
-    </div>
+                    <p id="errorMsg" class="error_message" role="alert" aria-live="polite"></p>
 
-    <script>
-        const API_URL = window.location.origin && window.location.origin !== 'null'
-            ? window.location.origin
-            : 'http://localhost:8080';
+                    <button type="submit" id="loginBtn">Login</button>
+                </form>
 
-        async function checkSession() {
-            try {
-                const response = await fetch(`${API_URL}/auth/me`, {
-                    credentials: 'include'
-                });
+                <p class="signup_prompt">Don’t have an account? <a href="Signup.html">Sign up</a></p>
+            </div>
+        </section>
+    </main>
 
-                if (response.ok) {
-                    window.location.href = 'Home.html';
-                }
-            } catch (error) {
-                // stay on login page
-            }
-        }
-
-        async function handleLogin(event) {
-            event.preventDefault();
-
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const errorMsg = document.getElementById('errorMsg');
-            const loginBtn = document.getElementById('loginBtn');
-
-            errorMsg.style.display = 'none';
-            loginBtn.disabled = true;
-            loginBtn.textContent = 'Logging in...';
-
-            try {
-                const response = await fetch(`${API_URL}/auth/login`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify({ email, password })
-                });
-
-                const text = await response.text();
-                let data = null;
-
-                try {
-                    data = text ? JSON.parse(text) : null;
-                } catch (error) {
-                    data = null;
-                }
-
-                if (!response.ok) {
-                    throw new Error((data && data.message) || text || 'Login failed');
-                }
-
-                window.location.href = 'Home.html';
-            } catch (error) {
-                errorMsg.textContent = error.message;
-                errorMsg.style.display = 'block';
-                loginBtn.disabled = false;
-                loginBtn.textContent = 'Login';
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', checkSession);
-    </script>
+    <script src="js/login.js"></script>
 </body>
 
 </html>

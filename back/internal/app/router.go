@@ -29,6 +29,7 @@ func Endpoints() []Endpoint {
 		{Method: "POST", Path: "/auth/login"},
 		{Method: "GET", Path: "/auth/me"},
 		{Method: "POST", Path: "/auth/logout"},
+		{Method: "POST", Path: "/auth/forgot-password"},
 		{Method: "POST", Path: "/auth/change-password"},
 		{Method: "GET", Path: "/auth/ping"},
 		{Method: "GET|PATCH", Path: "/patients/me"},
@@ -69,6 +70,7 @@ func NewRouter(db *sql.DB) *http.ServeMux {
 	router.HandleFunc("/auth/login", authHandler.Login)
 	router.HandleFunc("/auth/me", auth.AuthMiddleware(sessionStore, authHandler.Me))
 	router.HandleFunc("/auth/logout", authHandler.Logout)
+	router.HandleFunc("/auth/forgot-password", authHandler.ForgotPassword)
 	router.HandleFunc("/auth/change-password", auth.AuthMiddleware(sessionStore, authHandler.ChangePassword))
 	router.HandleFunc("/auth/ping", authHandler.Ping)
 
