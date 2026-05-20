@@ -4,249 +4,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles/style.css">
-    <title>Sign Up - Healthcare Management System</title>
+    <meta name="description" content="Create a Healthcare Management System account as a patient or doctor.">
+    <link rel="stylesheet" href="styles/style(Signup).css">
+    <title>Sign up - Healthcare Management System</title>
 </head>
 
 <body class="signup_body">
-    <div class="login_section">
-        <div class="input_form" id="signup_form">
-            <div class="input_title" id="sign_up_title">
-                <h2>Create Account</h2>
-                <p>Sign up to get started</p>
+    <a class="skip_link" href="#signUpForm">Skip to sign-up form</a>
+
+    <main class="welcome_shell signup_shell">
+        <section class="definition_section signup_definition" aria-label="Healthcare Management System account creation">
+            <header class="logo">
+                <img src="images/logo.png" alt="Healthcare Management System logo">
+                <div class="logo_definition">
+                    <h2>HealthCare Management System</h2>
+                    <p>Appointments, sessions, and clinic access in one place.</p>
+                </div>
+            </header>
+
+            <div class="introduction">
+                <p class="eyebrow">Create your account</p>
+                <h1>Start with the right <span>care profile</span></h1>
+                <p>
+                    Register as a patient to book appointments and track queue status, or register
+                    as a doctor to manage your speciality, clinic address, and daily sessions.
+                </p>
             </div>
 
-            <form id="sign_up_form" onsubmit="handleSignup(event)">
-                <div class="inputs">
-                    <label>I'm Registering As</label>
-                    <div class="role_selection">
-                        <input type="radio" id="patient" name="role" value="patient" checked hidden>
-                        <label for="patient" class="role_card">
-                            <h3>Patient</h3>
-                            <p>Book appointments and track queues</p>
-                        </label>
+            <div class="welcome_metrics" aria-label="Registration highlights">
+                <article>
+                    <strong>2</strong>
+                    <span>account types</span>
+                </article>
+                <article>
+                    <strong>Secure</strong>
+                    <span>cookie session</span>
+                </article>
+                <article>
+                    <strong>Fast</strong>
+                    <span>automatic login</span>
+                </article>
+            </div>
 
-                        <input type="radio" id="doctor" name="role" value="doctor" hidden>
-                        <label for="doctor" class="role_card">
-                            <h3>Doctor</h3>
-                            <p>Manage your clinic schedule</p>
-                        </label>
+            <aside class="enter_as_a_guest" aria-label="Existing account">
+                <div>
+                    <h4>Already registered?</h4>
+                    <p>Return to the login page and continue to your dashboard.</p>
+                </div>
+                <a class="guest_link" href="Welcome.html">Login <span aria-hidden="true">→</span></a>
+            </aside>
+        </section>
+
+        <section class="login_section signup_section" aria-labelledby="signupTitle">
+            <div class="input_form signup_form_card">
+                <div class="input_title">
+                    <p class="eyebrow">Account setup</p>
+                    <h1 id="signupTitle">Create account</h1>
+                    <p>Choose your role, then enter the details needed to create your profile.</p>
+                </div>
+
+                <form id="signUpForm" novalidate>
+
+                    <div class="form_grid">
+                        <div class="inputs">
+                            <label for="username">Username</label>
+                            <input type="text" name="username" id="username" placeholder="Choose a username" autocomplete="username" required>
+                        </div>
+
+                        <div class="inputs">
+                            <label for="email">Email address</label>
+                            <input type="email" name="email" id="email" placeholder="you@example.com" autocomplete="email" required>
+                        </div>
+
+                        <div class="inputs">
+                            <label for="first_name">First name</label>
+                            <input type="text" name="first_name" id="first_name" placeholder="First name" autocomplete="given-name" required>
+                        </div>
+
+                        <div class="inputs">
+                            <label for="last_name">Last name</label>
+                            <input type="text" name="last_name" id="last_name" placeholder="Last name" autocomplete="family-name" required>
+                        </div>
+
+                        <div class="inputs">
+                            <label for="phone_number">Phone number</label>
+                            <input type="tel" name="phone_number" id="phone_number" placeholder="+213 555 123 456" autocomplete="tel" required>
+                        </div>
+
+                        <div class="inputs">
+                            <label for="insurance_number">Insurance number</label>
+                            <input type="text" name="insurance_number" id="insurance_number" placeholder="Insurance number">
+                        </div>
+
+                        <div class="inputs">
+                            <label for="password">Password</label>
+                            <input type="password" name="password" id="password" placeholder="Create a password" autocomplete="new-password" required>
+                        </div>
+
+                        <div class="inputs">
+                            <label for="confirm_password">Confirm password</label>
+                            <input type="password" name="confirm_password" id="confirm_password" placeholder="Repeat your password" autocomplete="new-password" required>
+                        </div>
                     </div>
-                </div>
 
-                <div class="inputs">
-                    <label for="username">Username</label>
-                    <input type="text" name="username" id="username" placeholder="Choose a username" required>
-                </div>
+                    <p class="form_hint">Patient accounts require an insurance number. Doctor accounts require a speciality and clinic address.</p>
 
-                <div class="inputs">
-                    <label for="first_name">First Name</label>
-                    <input type="text" name="first_name" id="first_name" placeholder="First name" required>
-                </div>
+                    <p id="errorMsg" class="error_message" role="alert" aria-live="polite"></p>
+                    <p id="successMsg" class="success_message" role="status" aria-live="polite"></p>
 
-                <div class="inputs">
-                    <label for="last_name">Last Name</label>
-                    <input type="text" name="last_name" id="last_name" placeholder="Last name" required>
-                </div>
+                    <button type="submit" id="signupBtn">Create account</button>
+                </form>
 
-                <div class="inputs">
-                    <label for="email">Email</label>
-                    <input type="email" name="email" id="email" placeholder="Email address" required>
-                </div>
+                <p class="signup_prompt">Do you have an account? <a href="Welcome.html">Login</a></p>
+            </div>
+        </section>
+    </main>
 
-                <div class="inputs">
-                    <label for="phone_number">Phone</label>
-                    <input type="text" name="phone_number" id="phone_number" placeholder="Phone number" required>
-                </div>
-
-                <div class="inputs patient-only">
-                    <label for="insurance_number">Insurance Number</label>
-                    <input type="text" name="insurance_number" id="insurance_number" placeholder="Insurance number">
-                </div>
-
-                <div class="inputs doctor-only">
-                    <label for="speciality_id">Speciality</label>
-                    <select name="speciality_id" id="speciality_id">
-                        <option value="1">Cardiology</option>
-                        <option value="2">Pediatrics</option>
-                        <option value="3">Neurology</option>
-                        <option value="4">Orthopedics</option>
-                    </select>
-                </div>
-
-                <div class="inputs doctor-only">
-                    <label for="address">Address</label>
-                    <input type="text" name="address" id="address" placeholder="Clinic or office address">
-                </div>
-
-                <div class="inputs">
-                    <label for="password">Password</label>
-                    <input type="password" name="password" id="password" placeholder="Password" required>
-                </div>
-
-                <div class="inputs">
-                    <label for="confirm_password">Confirm Password</label>
-                    <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm password" required>
-                </div>
-
-                <button type="submit" id="signupBtn">Sign Up</button>
-                <p id="errorMsg" style="color: red; display: none;"></p>
-                <p id="successMsg" style="color: green; display: none;"></p>
-            </form>
-
-            <p>Do you have an account? <a href="Welcome.html">Login</a></p>
-        </div>
-    </div>
-
-    <script>
-        const API_URL = window.location.origin && window.location.origin !== 'null'
-            ? window.location.origin
-            : 'http://localhost:8080';
-
-        const patientFields = document.querySelectorAll('.patient-only');
-        const doctorFields = document.querySelectorAll('.doctor-only');
-        const roleInputs = document.querySelectorAll('input[name="role"]');
-
-        function toggleFields() {
-            const selectedRole = document.querySelector('input[name="role"]:checked').value;
-
-            if (selectedRole === 'patient') {
-                patientFields.forEach(el => {
-                    el.style.display = 'flex';
-                    el.querySelectorAll('input, select').forEach(input => input.disabled = false);
-                });
-                doctorFields.forEach(el => {
-                    el.style.display = 'none';
-                    el.querySelectorAll('input, select').forEach(input => input.disabled = true);
-                });
-            } else {
-                doctorFields.forEach(el => {
-                    el.style.display = 'flex';
-                    el.querySelectorAll('input, select').forEach(input => input.disabled = false);
-                });
-                patientFields.forEach(el => {
-                    el.style.display = 'none';
-                    el.querySelectorAll('input, select').forEach(input => input.disabled = true);
-                });
-            }
-        }
-
-        roleInputs.forEach(input => input.addEventListener('change', toggleFields));
-        toggleFields();
-
-        async function handleSignup(event) {
-            event.preventDefault();
-
-            const username = document.getElementById('username').value.trim();
-            const firstName = document.getElementById('first_name').value.trim();
-            const lastName = document.getElementById('last_name').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const phoneNumber = document.getElementById('phone_number').value.trim();
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirm_password').value;
-            const role = document.querySelector('input[name="role"]:checked').value;
-            const errorMsg = document.getElementById('errorMsg');
-            const successMsg = document.getElementById('successMsg');
-            const signupBtn = document.getElementById('signupBtn');
-
-            errorMsg.style.display = 'none';
-            successMsg.style.display = 'none';
-
-            if (password !== confirmPassword) {
-                errorMsg.textContent = 'Passwords do not match';
-                errorMsg.style.display = 'block';
-                return;
-            }
-
-            const payload = {
-                username,
-                first_name: firstName,
-                last_name: lastName,
-                phone_number: phoneNumber,
-                email,
-                password,
-                role
-            };
-
-            if (role === 'patient') {
-                const insuranceNumber = document.getElementById('insurance_number').value.trim();
-                if (!insuranceNumber) {
-                    errorMsg.textContent = 'Insurance number is required for patients';
-                    errorMsg.style.display = 'block';
-                    return;
-                }
-
-                payload.insurance_number = insuranceNumber;
-            }
-
-            if (role === 'doctor') {
-                const specialityId = document.getElementById('speciality_id').value;
-                const address = document.getElementById('address').value.trim();
-
-                if (!address) {
-                    errorMsg.textContent = 'Address is required for doctors';
-                    errorMsg.style.display = 'block';
-                    return;
-                }
-
-                payload.speciality_id = Number(specialityId);
-                payload.address = address;
-            }
-
-            signupBtn.disabled = true;
-            signupBtn.textContent = 'Creating account...';
-
-            try {
-                const response = await fetch(`${API_URL}/auth/register`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify(payload)
-                });
-
-                const registerText = await response.text();
-                let registerData = null;
-
-                try {
-                    registerData = registerText ? JSON.parse(registerText) : null;
-                } catch (error) {
-                    registerData = null;
-                }
-
-                if (!response.ok) {
-                    throw new Error((registerData && registerData.message) || registerText || 'Signup failed');
-                }
-
-                const loginResponse = await fetch(`${API_URL}/auth/login`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify({ email, password })
-                });
-
-                if (!loginResponse.ok) {
-                    throw new Error('Account created, but automatic login failed. Please log in manually.');
-                }
-
-                successMsg.textContent = 'Account created successfully! Redirecting...';
-                successMsg.style.display = 'block';
-
-                setTimeout(() => {
-                    window.location.href = 'Home.html';
-                }, 1200);
-            } catch (error) {
-                errorMsg.textContent = error.message;
-                errorMsg.style.display = 'block';
-            } finally {
-                signupBtn.disabled = false;
-                signupBtn.textContent = 'Sign Up';
-            }
-        }
-    </script>
+    <script src="js/signup.js"></script>
 </body>
 
 </html>

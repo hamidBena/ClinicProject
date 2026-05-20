@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Medical Staff dashboard for managing patient reservations, queue updates, and doctor lists.">
+    <title>Medical Staff - Healthcare Management System</title>
+    <link rel="stylesheet" href="styles/style(MedicalStaff).css">
+</head>
+<body>
+    <a class="skip-link" href="#mainContent">Skip to main content</a>
+
+    <div class="dashboard-shell">
+        <aside class="sidebar" aria-label="Main sidebar">
+            <div class="brand-block">
+                <img class="brand-logo" src="images/logo.png" alt="Healthcare Management System logo">
+                <div>
+                    <p class="eyebrow">Staff portal</p>
+                    <h1>Healthcare Management System</h1>
+                </div>
+            </div>
+
+            <div class="user-card" aria-label="Signed in staff member">
+                <img src="images/logo.png" alt="Staff profile avatar">
+                <div>
+                    <strong id="sidebarUserName">Dr. Staff Member</strong>
+                    <span>Medical Staff</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav" aria-label="Dashboard navigation">
+                <button type="button" class="nav-link is-active" data-page-target="home" aria-controls="home" aria-current="page">
+                    <span aria-hidden="true">⌂</span>
+                    Home
+                </button>
+                <button type="button" class="nav-link" data-page-target="profile" aria-controls="profile">
+                    <span aria-hidden="true">◉</span>
+                    My Profile
+                </button>
+                <button type="button" class="nav-link" data-page-target="reservations" aria-controls="reservations">
+                    <span aria-hidden="true">◫</span>
+                    Reservations
+                </button>
+                <button type="button" class="nav-link" data-page-target="queue" aria-controls="queue">
+                    <span aria-hidden="true">≡</span>
+                    Queue List
+                </button>
+                <button type="button" class="nav-link" data-page-target="doctors" aria-controls="doctors">
+                    <span aria-hidden="true">✦</span>
+                    Doctor List
+                </button>
+            </nav>
+
+            <a class="logout-link" id="logoutBtn" href="Welcome.html">Logout</a>
+        </aside>
+
+        <main id="mainContent" class="main-content">
+
+            <!-- HOME VIEW -->
+            <section id="home" class="view is-active" aria-labelledby="homeTitle">
+                <header class="page-header hero-header">
+                    <div>
+                        <p class="eyebrow">Welcome back</p>
+                        <h2 id="homeTitle">Staff Dashboard</h2>
+                        <p>Manage patient reservations, monitor queues, and keep doctor records up to date.</p>
+                    </div>
+                    <div class="date-card" aria-label="Current date">
+                        <span class="date-icon" aria-hidden="true">+</span>
+                        <div>
+                            <strong id="weekdayText">Monday</strong>
+                            <span id="dateText">19 May 2026</span>
+                        </div>
+                    </div>
+                </header>
+
+                <div class="stats-strip" aria-label="Today's overview">
+                    <article class="stat-card">
+                        <span class="stat-icon stat-icon--primary">◫</span>
+                        <div>
+                            <strong id="statReservations">12</strong>
+                            <span>Reservations today</span>
+                        </div>
+                    </article>
+                    <article class="stat-card">
+                        <span class="stat-icon stat-icon--warning">≡</span>
+                        <div>
+                            <strong id="statWaiting">7</strong>
+                            <span>Patients waiting</span>
+                        </div>
+                    </article>
+                    <article class="stat-card">
+                        <span class="stat-icon stat-icon--success">✔</span>
+                        <div>
+                            <strong id="statDone">5</strong>
+                            <span>Completed today</span>
+                        </div>
+                    </article>
+                    <article class="stat-card">
+                        <span class="stat-icon stat-icon--info">✦</span>
+                        <div>
+                            <strong id="statDoctors">8</strong>
+                            <span>Active doctors</span>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="home-grid">
+                    <section class="panel quick-actions-panel" aria-labelledby="quickActionsTitle">
+                        <h3 id="quickActionsTitle">Quick actions</h3>
+                        <div class="quick-action-list">
+                            <button type="button" class="quick-action-btn" data-action="open-add-reservation">
+                                <span class="qa-icon">◫</span>
+                                <div>
+                                    <strong>Add reservation</strong>
+                                    <small>Register a new patient appointment</small>
+                                </div>
+                            </button>
+                            <button type="button" class="quick-action-btn" data-page-target="queue">
+                                <span class="qa-icon">≡</span>
+                                <div>
+                                    <strong>Update queue</strong>
+                                    <small>Advance to the next patient</small>
+                                </div>
+                            </button>
+                            <button type="button" class="quick-action-btn" data-page-target="doctors">
+                                <span class="qa-icon">✦</span>
+                                <div>
+                                    <strong>Doctor list</strong>
+                                    <small>View and manage doctor queues</small>
+                                </div>
+                            </button>
+                        </div>
+                    </section>
+
+                    <section class="panel recent-reservations-panel" aria-labelledby="recentResTitle">
+                        <div class="panel-header">
+                            <h3 id="recentResTitle">Recent reservations</h3>
+                            <button type="button" class="link-btn" data-page-target="reservations">View all</button>
+                        </div>
+                        <div class="mini-reservation-list" id="homeRecentList"></div>
+                    </section>
+                </div>
+            </section>
+
+            <!-- PROFILE VIEW -->
+            <section id="profile" class="view" aria-labelledby="profileTitle" hidden>
+                <header class="page-header">
+                    <div>
+                        <p class="eyebrow">Account</p>
+                        <h2 id="profileTitle">My Profile</h2>
+                        <p>View and update your personal and professional information.</p>
+                    </div>
+                </header>
+
+                <div class="profile-layout">
+                    <div class="panel profile-card-panel">
+                        <div class="profile-topline">
+                            <img class="profile-photo" src="images/logo.png" alt="Staff profile photo">
+                            <div>
+                                <strong id="profileFullName">Staff Member</strong>
+                                <p id="profileRole" class="eyebrow" style="margin-top:0.3rem;">Medical Staff</p>
+                                <div class="chip-row">
+                                    <span class="chip chip-success" id="profileStatusChip">Active</span>
+                                </div>
+                            </div>
+                        </div>
+                        <dl class="info-list" id="profileInfoList">
+                            <div>
+                                <dt>Username</dt>
+                                <dd id="infoUsername">—</dd>
+                            </div>
+                            <div>
+                                <dt>Email</dt>
+                                <dd id="infoEmail">—</dd>
+                            </div>
+                            <div>
+                                <dt>Phone</dt>
+                                <dd id="infoPhone">—</dd>
+                            </div>
+                            <div>
+                                <dt>Role</dt>
+                                <dd>Medical Staff</dd>
+                            </div>
+                        </dl>
+                    </div>
+
+                    <div class="panel">
+                        <div class="form-header">
+                            <p class="eyebrow">Edit details</p>
+                            <h3>Update profile</h3>
+                        </div>
+                        <form id="profileForm" novalidate>
+                            <div class="form-grid">
+                                <div class="field-group">
+                                    <label for="pfFirstName">First name</label>
+                                    <input type="text" id="pfFirstName" placeholder="First name" autocomplete="given-name">
+                                    <span class="field-error" id="pfFirstNameErr"></span>
+                                </div>
+                                <div class="field-group">
+                                    <label for="pfLastName">Last name</label>
+                                    <input type="text" id="pfLastName" placeholder="Last name" autocomplete="family-name">
+                                    <span class="field-error" id="pfLastNameErr"></span>
+                                </div>
+                                <div class="field-group">
+                                    <label for="pfEmail">Email</label>
+                                    <input type="email" id="pfEmail" placeholder="you@example.com" autocomplete="email">
+                                    <span class="field-error" id="pfEmailErr"></span>
+                                </div>
+                                <div class="field-group">
+                                    <label for="pfPhone">Phone</label>
+                                    <input type="tel" id="pfPhone" placeholder="+213 555 123 456" autocomplete="tel">
+                                    <span class="field-error" id="pfPhoneErr"></span>
+                                </div>
+                                <div class="field-group field-wide">
+                                    <label for="pfPassword">New password <span style="font-weight:400;color:var(--muted)">(leave blank to keep current)</span></label>
+                                    <input type="password" id="pfPassword" placeholder="New password" autocomplete="new-password">
+                                </div>
+                            </div>
+                            <p class="form-status" id="profileStatus" aria-live="polite"></p>
+                            <div class="button-row">
+                                <button type="submit" class="button button-primary" id="saveProfileBtn">Save changes</button>
+                                <button type="button" class="button button-secondary" id="cancelProfileBtn">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RESERVATIONS VIEW -->
+            <section id="reservations" class="view" aria-labelledby="reservationsTitle" hidden>
+                <header class="page-header">
+                    <div>
+                        <p class="eyebrow">Patient appointments</p>
+                        <h2 id="reservationsTitle">Reservations</h2>
+                        <p>Add new patient reservations and manage existing appointments.</p>
+                    </div>
+                    <button type="button" class="button button-primary" id="openAddReservationBtn">+ Add reservation</button>
+                </header>
+
+                <div class="panel" style="margin-bottom:1rem;">
+                    <div class="toolbar">
+                        <div class="search-field">
+                            <span aria-hidden="true">⌕</span>
+                            <input type="search" id="reservationSearch" placeholder="Search by patient name or doctor...">
+                        </div>
+                        <div class="filter-group">
+                            <select id="reservationStatusFilter" aria-label="Filter by status">
+                                <option value="all">All statuses</option>
+                                <option value="waiting">Waiting</option>
+                                <option value="inProgress">In progress</option>
+                                <option value="finished">Finished</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reservation-grid" id="reservationGrid"></div>
+                <p class="empty-state" id="reservationEmpty" hidden>No reservations found.</p>
+            </section>
+
+            <!-- QUEUE VIEW -->
+            <section id="queue" class="view" aria-labelledby="queueTitle" hidden>
+                <header class="page-header">
+                    <div>
+                        <p class="eyebrow">Live queue</p>
+                        <h2 id="queueTitle">Queue list</h2>
+                        <p>Monitor and advance patient queues for each doctor.</p>
+                    </div>
+                </header>
+
+                <div class="queue-layout">
+                    <aside class="doctor-selector" aria-label="Select doctor queue">
+                        <div id="doctorTabList"></div>
+                    </aside>
+
+                    <article class="panel queue-panel">
+                        <header class="queue-panel-header">
+                            <div>
+                                <h3 id="queueDoctorTitle">Select a doctor</h3>
+                                <p id="queueCount">0 patients</p>
+                            </div>
+                            <div class="segmented-control" aria-label="Filter queue status">
+                                <button type="button" class="is-active" data-status-filter="all">All</button>
+                                <button type="button" data-status-filter="waiting">Waiting</button>
+                                <button type="button" data-status-filter="inProgress">In progress</button>
+                                <button type="button" data-status-filter="finished">Finished</button>
+                            </div>
+                        </header>
+
+                        <div class="next-patient-bar" id="nextPatientBar" hidden>
+                            <div>
+                                <span class="eyebrow">Currently serving</span>
+                                <strong id="currentPatientName">—</strong>
+                            </div>
+                            <button type="button" class="button button-primary" id="nextPatientBtn">Next patient →</button>
+                        </div>
+
+                        <div class="table-wrap">
+                            <table class="queue-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Position</th>
+                                        <th scope="col">Patient</th>
+                                        <th scope="col">Time</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="queueTableBody"></tbody>
+                            </table>
+                        </div>
+                        <p class="empty-state" id="queueEmpty" hidden>No patients in this queue.</p>
+                    </article>
+                </div>
+            </section>
+
+            <!-- DOCTOR LIST VIEW -->
+            <section id="doctors" class="view" aria-labelledby="doctorsTitle" hidden>
+                <header class="page-header">
+                    <div>
+                        <p class="eyebrow">Medical team</p>
+                        <h2 id="doctorsTitle">Doctor list</h2>
+                        <p>View doctors, manage their queue, and update availability status.</p>
+                    </div>
+                </header>
+
+                <div class="panel" style="margin-bottom:1rem;">
+                    <div class="toolbar">
+                        <div class="search-field">
+                            <span aria-hidden="true">⌕</span>
+                            <input type="search" id="doctorSearch" placeholder="Search by name or speciality...">
+                        </div>
+                        <div class="filter-group">
+                            <select id="doctorStatusFilter" aria-label="Filter by status">
+                                <option value="all">All statuses</option>
+                                <option value="available">Available</option>
+                                <option value="busy">Busy</option>
+                                <option value="unavailable">Unavailable</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="doctor-grid" id="doctorGrid"></div>
+                <p class="empty-state" id="doctorEmpty" hidden>No doctors found.</p>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- OVERLAY -->
+    <div class="overlay" id="modalOverlay" hidden></div>
+
+    <!-- ADD RESERVATION MODAL -->
+    <div class="modal" id="addReservationModal" role="dialog" aria-modal="true" aria-labelledby="addResTitle" hidden>
+        <div class="modal-header">
+            <div>
+                <p class="eyebrow">New appointment</p>
+                <h2 id="addResTitle">Add patient reservation</h2>
+            </div>
+            <button type="button" class="modal-close" id="closeAddReservationBtn" aria-label="Close modal">✕</button>
+        </div>
+        <form id="addReservationForm" novalidate>
+            <div class="form-grid">
+                <div class="field-group">
+                    <label for="resPatientFirst">Patient first name</label>
+                    <input type="text" id="resPatientFirst" placeholder="First name" required>
+                    <span class="field-error" id="resPatientFirstErr"></span>
+                </div>
+                <div class="field-group">
+                    <label for="resPatientLast">Patient last name</label>
+                    <input type="text" id="resPatientLast" placeholder="Last name" required>
+                    <span class="field-error" id="resPatientLastErr"></span>
+                </div>
+                <div class="field-group">
+                    <label for="resDoctor">Doctor</label>
+                    <select id="resDoctor" required>
+                        <option value="">Select a doctor</option>
+                    </select>
+                    <span class="field-error" id="resDoctorErr"></span>
+                </div>
+                <div class="field-group">
+                    <label for="resDate">Appointment date</label>
+                    <input type="date" id="resDate" required>
+                    <span class="field-error" id="resDateErr"></span>
+                </div>
+                <div class="field-group field-wide">
+                    <label for="resNotes">Notes <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+                    <input type="text" id="resNotes" placeholder="Any additional information...">
+                </div>
+            </div>
+            <p class="form-status" id="addResStatus" aria-live="polite"></p>
+            <div class="button-row">
+                <button type="submit" class="button button-primary">Save reservation</button>
+                <button type="button" class="button button-secondary" id="cancelAddResBtn">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- UPDATE DOCTOR STATUS MODAL -->
+    <div class="modal" id="updateDoctorModal" role="dialog" aria-modal="true" aria-labelledby="updateDocTitle" hidden>
+        <div class="modal-header">
+            <div>
+                <p class="eyebrow">Doctor management</p>
+                <h2 id="updateDocTitle">Update doctor status</h2>
+            </div>
+            <button type="button" class="modal-close" id="closeUpdateDoctorBtn" aria-label="Close modal">✕</button>
+        </div>
+        <div id="updateDoctorBody">
+            <div class="doctor-modal-info" id="doctorModalInfo"></div>
+            <div class="field-group" style="margin-top:1.2rem;">
+                <label for="doctorStatusSelect">Availability status</label>
+                <select id="doctorStatusSelect">
+                    <option value="available">Available</option>
+                    <option value="busy">Busy</option>
+                    <option value="unavailable">Unavailable</option>
+                </select>
+            </div>
+            <div class="field-group" style="margin-top:1rem;">
+                <label for="doctorQueueAction">Queue action</label>
+                <select id="doctorQueueAction">
+                    <option value="none">No queue change</option>
+                    <option value="create">Create new queue for today</option>
+                    <option value="reset">Reset queue</option>
+                </select>
+            </div>
+            <p class="form-status" id="updateDoctorStatus" aria-live="polite"></p>
+            <div class="button-row" style="margin-top:1.2rem;">
+                <button type="button" class="button button-primary" id="saveDoctorUpdateBtn">Save changes</button>
+                <button type="button" class="button button-secondary" id="cancelUpdateDoctorBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONFIRM DIALOG -->
+    <section class="confirm-dialog" id="cancelDialog" role="dialog" aria-modal="true" aria-labelledby="cancelDialogTitle" hidden>
+        <div>
+            <p class="eyebrow">Confirm action</p>
+            <h2 id="cancelDialogTitle">Cancel reservation</h2>
+            <p>Cancel the reservation for <strong id="cancelPatientName">this patient</strong>?</p>
+        </div>
+        <div class="button-row">
+            <button type="button" class="button button-danger" id="confirmCancelBtn">Yes, cancel</button>
+            <button type="button" class="button button-secondary" id="closeCancelDialogBtn">No, keep it</button>
+        </div>
+    </section>
+
+    <script src="js/medcal-staff.js"></script>
+</body>
+</html>

@@ -1,123 +1,431 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Patient dashboard for booking appointments, managing reservations, tracking queues, and reading healthcare notifications.">
     <title>Healthcare Management System</title>
-    <link rel="stylesheet" href="styles/style(Guest,Home).css">
+    <link rel="stylesheet" href="styles/style(Home).css">
 </head>
+<body>
+    <a class="skip-link" href="#mainContent">Skip to main content</a>
 
-<body class="home_body">
-    <div class="sidebar">
-        <div class="logo">
-            <img src="images/logo.png" alt="">
-            <h4>HealthCare Management System</h4>
-        </div>
-
-        <div class="profile">
-            <img src="images/logo.png" alt="">
-            <div class="profile_name">
-                <h4 id="sidebarUserName">Loading...</h4>
-                <p id="sidebarUserRole">Session</p>
+    <div class="dashboard-shell">
+        <aside class="sidebar" aria-label="Main sidebar">
+            <div class="brand-block">
+                <img class="brand-logo" src="images/logo.png" alt="Healthcare Management System logo">
+                <div>
+                    <p class="eyebrow">Patient portal</p>
+                    <h1>Healthcare Management System</h1>
+                </div>
             </div>
-        </div>
 
-        <div class="navbar">
-            <button id="homeBtn" type="button">Home</button>
-            <button id="sessionBtn" type="button">Session</button>
-        </div>
+            <div class="user-card" aria-label="Signed in user">
+                <img src="images/logo.png" alt="User profile avatar">
+                <div>
+                    <strong id="sidebarUserName">Messallem Ouail</strong>
+                    <span>Patient</span>
+                </div>
+            </div>
 
-        <div class="logout">
-            <a href="#" id="logoutBtn">Logout</a>
-        </div>
+            <nav class="sidebar-nav" aria-label="Dashboard navigation">
+                <button type="button" class="nav-link is-active" data-page-target="home" aria-controls="home" aria-current="page">
+                    <span aria-hidden="true">⌂</span>
+                    Home
+                </button>
+                <button type="button" class="nav-link" data-page-target="profile" aria-controls="profile">
+                    <span aria-hidden="true">◉</span>
+                    Profile
+                </button>
+                <button type="button" class="nav-link" data-page-target="reservations" aria-controls="reservations">
+                    <span aria-hidden="true">◫</span>
+                    Reservations
+                </button>
+                <button type="button" class="nav-link" data-page-target="queue" aria-controls="queue">
+                    <span aria-hidden="true">≡</span>
+                    Queue
+                </button>
+                <button type="button" class="nav-link" data-page-target="notifications" aria-controls="notifications">
+                    <span aria-hidden="true">•</span>
+                    Notifications
+                </button>
+            </nav>
+
+            <a class="logout-link" id="logoutBtn" href="Welcome.html">Logout</a>
+        </aside>
+
+        <main id="mainContent" class="main-content">
+            <section id="home" class="view is-active" aria-labelledby="homeTitle">
+                <header class="page-header hero-header">
+                    <div>
+                        <p class="eyebrow">Welcome back</p>
+                        <h2 id="homeTitle">Welcome, <span id="username">mouad</span></h2>
+                        <p>Book an appointment with a specialist and track your care from one place.</p>
+                    </div>
+
+                    <div class="date-card" aria-label="Current date">
+                        <span class="date-icon" aria-hidden="true">-</span>
+                        <div>
+                            <strong id="weekdayText">Monday</strong>
+                            <span id="dateText">16 May 2026</span>
+                        </div>
+                    </div>
+                </header>
+
+                <section class="search-panel" aria-labelledby="specialitySearchLabel">
+                    <label id="specialitySearchLabel" for="specialitySearch">Search specialities</label>
+                    <div class="search-field">
+                        <span aria-hidden="true">⌕</span>
+                        <input id="specialitySearch" type="search" placeholder="Search cardiology, neurology, dentistry...">
+                    </div>
+                    <p id="specialityEmpty" class="empty-inline" hidden>No matching specialities found.</p>
+                </section>
+
+                <section class="specialities-section" aria-labelledby="specialitiesTitle">
+                    <div class="section-heading">
+                        <p class="eyebrow">Available departments</p>
+                        <h3 id="specialitiesTitle">Popular specialities</h3>
+                    </div>
+
+                    <div class="speciality-grid" id="specialityGrid">
+                        <button type="button" class="speciality-card" data-specialty="cardiology heart blood vessel care">
+                            <img src="images/Cardiology.png" alt="Cardiology speciality icon">
+                            <span class="speciality-name">Cardiology</span>
+                            <span class="speciality-description">Heart and blood vessel care</span>
+                            <span class="availability-pill">8 doctors available</span>
+                        </button>
+
+                        <button type="button" class="speciality-card" data-specialty="neurology brain nervous system care">
+                            <img src="images/Neurology.png" alt="Neurology speciality icon">
+                            <span class="speciality-name">Neurology</span>
+                            <span class="speciality-description">Brain and nervous system care</span>
+                            <span class="availability-pill">6 doctors available</span>
+                        </button>
+
+                        <button type="button" class="speciality-card" data-specialty="dermatology skin hair nail care">
+                            <img src="images/Dermatology.png" alt="Dermatology speciality icon">
+                            <span class="speciality-name">Dermatology</span>
+                            <span class="speciality-description">Skin, hair and nail care</span>
+                            <span class="availability-pill">5 doctors available</span>
+                        </button>
+
+                        <button type="button" class="speciality-card" data-specialty="psychiatry mental health wellbeing">
+                            <img src="images/Psychiatry.png" alt="Psychiatry speciality icon">
+                            <span class="speciality-name">Psychiatry</span>
+                            <span class="speciality-description">Mental health and wellbeing</span>
+                            <span class="availability-pill">4 doctors available</span>
+                        </button>
+
+                        <button type="button" class="speciality-card" data-specialty="orthopedics bone joint muscle care">
+                            <img src="images/Orthopedics.png" alt="Orthopedics speciality icon">
+                            <span class="speciality-name">Orthopedics</span>
+                            <span class="speciality-description">Bone, joint and muscle care</span>
+                            <span class="availability-pill">7 doctors available</span>
+                        </button>
+
+                        <button type="button" class="speciality-card" data-specialty="dentistry dental oral health care">
+                            <img src="images/Dentistry.png" alt="Dentistry speciality icon">
+                            <span class="speciality-name">Dentistry</span>
+                            <span class="speciality-description">Dental and oral health care</span>
+                            <span class="availability-pill">9 doctors available</span>
+                        </button>
+
+                        <button type="button" class="speciality-card" data-specialty="gastroenterology digestive system care">
+                            <img src="images/Gastro.png" alt="Gastroenterology speciality icon">
+                            <span class="speciality-name">Gastroenterology</span>
+                            <span class="speciality-description">Digestive system care</span>
+                            <span class="availability-pill">3 doctors available</span>
+                        </button>
+
+                        <button type="button" class="speciality-card" data-specialty="hematology blood disorders treatment">
+                            <img src="images/Hematology.png" alt="Hematology speciality icon">
+                            <span class="speciality-name">Hematology</span>
+                            <span class="speciality-description">Blood disorders and treatment</span>
+                            <span class="availability-pill">4 doctors available</span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="trust-strip" aria-label="Service guarantees">
+                    <article>
+                        <strong>Verified specialists</strong>
+                        <span>Doctors are reviewed before being listed.</span>
+                    </article>
+                    <article>
+                        <strong>Fast booking</strong>
+                        <span>Reserve a visit in a few steps.</span>
+                    </article>
+                    <article>
+                        <strong>Private by design</strong>
+                        <span>Profile and booking data stay protected.</span>
+                    </article>
+                </section>
+            </section>
+
+            <section id="profile" class="view" aria-labelledby="profileTitle" hidden>
+                <header class="page-header">
+                    <div>
+                        <p class="eyebrow">Account details</p>
+                        <h2 id="profileTitle">Profile</h2>
+                        <p>Review and update patient contact information.</p>
+                    </div>
+                </header>
+
+                <div class="profile-layout">
+                    <article class="panel profile-panel" aria-label="Profile information">
+                        <div class="profile-topline">
+                            <img class="profile-photo" src="images/Cardiology.png" alt="Patient profile photo">
+                            <div>
+                                <h3 id="profileName">Messallem Ouail</h3>
+                                <div class="chip-row">
+                                    <span class="chip chip-success">Active</span>
+                                    <span class="chip">Patient</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <dl class="info-list">
+                            <div>
+                                <dt>Email</dt>
+                                <dd id="displayEmail">messallem.ouail@example.com</dd>
+                            </div>
+                            <div>
+                                <dt>Phone</dt>
+                                <dd id="displayPhone">+123 456 7890</dd>
+                            </div>
+                            <div>
+                                <dt>Address</dt>
+                                <dd id="displayAddress">123 Main Street, City, Country</dd>
+                            </div>
+                            <div>
+                                <dt>Birthday</dt>
+                                <dd id="displayBirthday">January 1, 1990</dd>
+                            </div>
+                            <div>
+                                <dt>Gender</dt>
+                                <dd>Male</dd>
+                            </div>
+                            <div>
+                                <dt>Chronic diseases</dt>
+                                <dd><span class="chip chip-warning">Asthma</span></dd>
+                            </div>
+                        </dl>
+
+                        <button type="button" class="button button-primary" id="editProfileBtn">Edit profile</button>
+                    </article>
+
+                    <form class="panel edit-panel" id="profileForm" aria-label="Update profile form" hidden novalidate>
+                        <header class="form-header">
+                            <h3>Update profile</h3>
+                            <p>Changes are reflected in this page immediately.</p>
+                        </header>
+
+                        <div class="form-grid">
+                            <div class="field-group">
+                                <label for="emailInput">Email</label>
+                                <input type="email" id="emailInput" name="email" value="messallem.ouail@example.com" required>
+                                <small class="field-error" data-error-for="emailInput"></small>
+                            </div>
+
+                            <div class="field-group">
+                                <label for="phoneInput">Phone</label>
+                                <input type="tel" id="phoneInput" name="phone" value="+123 456 7890" required>
+                                <small class="field-error" data-error-for="phoneInput"></small>
+                            </div>
+
+                            <div class="field-group field-wide">
+                                <label for="addressInput">Address</label>
+                                <input type="text" id="addressInput" name="address" value="123 Main Street, City, Country" required>
+                                <small class="field-error" data-error-for="addressInput"></small>
+                            </div>
+
+                            <div class="field-group">
+                                <label for="birthdayInput">Birthday</label>
+                                <input type="date" id="birthdayInput" name="birthday" value="1990-01-01" required>
+                                <small class="field-error" data-error-for="birthdayInput"></small>
+                            </div>
+                        </div>
+
+                        <p class="form-status" id="profileFormStatus" role="status"></p>
+
+                        <div class="button-row">
+                            <button type="submit" class="button button-primary">Save changes</button>
+                            <button type="button" class="button button-secondary" id="cancelProfileEditBtn">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <section id="reservations" class="view" aria-labelledby="reservationsTitle" hidden>
+                <header class="page-header">
+                    <div>
+                        <p class="eyebrow">Appointments</p>
+                        <h2 id="reservationsTitle">Reservations</h2>
+                        <p>Your booked appointments and queue numbers.</p>
+                    </div>
+                </header>
+
+                <div class="reservation-grid" id="reservationList">
+                    <p class="empty-state" id="reservationEmpty" hidden>No active reservations. Book a specialist from the home page.</p>
+
+                    <article class="reservation-card" data-doctor="Dr. Belfatmi Ilyes">
+                        <header>
+                            <div class="doctor-line">
+                                <img src="images/Orthopedics.png" alt="Orthopedics doctor icon">
+                                <div>
+                                    <h3>Dr. Belfatmi Ilyes</h3>
+                                    <p>Orthopedics</p>
+                                </div>
+                            </div>
+                            <span class="status-badge status-waiting">Waiting</span>
+                        </header>
+
+                        <dl class="reservation-meta">
+                            <div>
+                                <dt>Queue number</dt>
+                                <dd>#1</dd>
+                            </div>
+                            <div>
+                                <dt>Date</dt>
+                                <dd>April 20, 2026</dd>
+                            </div>
+                        </dl>
+
+                        <button type="button" class="button button-danger cancel-reservation-btn">Cancel reservation</button>
+                    </article>
+
+                    <article class="reservation-card" data-doctor="Dr. Hireche Anes">
+                        <header>
+                            <div class="doctor-line">
+                                <img src="images/Cardiology.png" alt="Cardiology doctor icon">
+                                <div>
+                                    <h3>Dr. Hireche Anes</h3>
+                                    <p>Cardiology</p>
+                                </div>
+                            </div>
+                            <span class="status-badge status-waiting">Waiting</span>
+                        </header>
+
+                        <dl class="reservation-meta">
+                            <div>
+                                <dt>Queue number</dt>
+                                <dd>#2</dd>
+                            </div>
+                            <div>
+                                <dt>Date</dt>
+                                <dd>April 20, 2026</dd>
+                            </div>
+                        </dl>
+
+                        <button type="button" class="button button-danger cancel-reservation-btn">Cancel reservation</button>
+                    </article>
+                </div>
+            </section>
+
+            <section id="queue" class="view" aria-labelledby="queueTitle" hidden>
+                <header class="page-header">
+                    <div>
+                        <p class="eyebrow">Live queue</p>
+                        <h2 id="queueTitle">Queue information</h2>
+                        <p>Track your position and the current appointment status.</p>
+                    </div>
+                </header>
+
+                <div class="queue-layout">
+                    <aside class="doctor-selector" aria-label="Select doctor queue">
+                        <button type="button" class="doctor-tab is-active" data-doctor-id="hireche">
+                            <img src="images/Cardiology.png" alt="Cardiology icon">
+                            <span>
+                                <strong>Dr. Hireche Anes</strong>
+                                <small>Cardiology</small>
+                            </span>
+                        </button>
+                        <button type="button" class="doctor-tab" data-doctor-id="belfatmi">
+                            <img src="images/Orthopedics.png" alt="Orthopedics icon">
+                            <span>
+                                <strong>Dr. Belfatmi Ilyes</strong>
+                                <small>Orthopedics</small>
+                            </span>
+                        </button>
+                    </aside>
+
+                    <article class="panel queue-panel">
+                        <header class="queue-panel-header">
+                            <div>
+                                <h3 id="queueDoctorTitle">Dr. Hireche Anes queue</h3>
+                                <p id="queueCount">0 patients</p>
+                            </div>
+
+                            <div class="segmented-control" aria-label="Filter queue status">
+                                <button type="button" class="is-active" data-status-filter="all">All</button>
+                                <button type="button" data-status-filter="finished">Finished</button>
+                                <button type="button" data-status-filter="waiting">Waiting</button>
+                                <button type="button" data-status-filter="inProgress">In progress</button>
+                            </div>
+                        </header>
+
+                        <div class="table-wrap">
+                            <table class="queue-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Position</th>
+                                        <th scope="col">Patient</th>
+                                        <th scope="col">Time</th>
+                                        <th scope="col">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="queueTableBody"></tbody>
+                            </table>
+                        </div>
+                        <p class="empty-state" id="queueEmpty" hidden>No patients match this filter.</p>
+                    </article>
+                </div>
+            </section>
+
+            <section id="notifications" class="view" aria-labelledby="notificationsTitle" hidden>
+                <header class="page-header">
+                    <div>
+                        <p class="eyebrow">Updates</p>
+                        <h2 id="notificationsTitle">Notifications</h2>
+                        <p>Recent appointment and queue updates.</p>
+                    </div>
+                </header>
+
+                <div class="notification-list">
+                    <article class="notification-card">
+                        <header>
+                            <h3>Appointment reminder</h3>
+                            <time datetime="PT10M">10 min</time>
+                        </header>
+                        <p>Your cardiology appointment begins soon. Please arrive at the waiting area and keep your queue number visible.</p>
+                    </article>
+
+                    <article class="notification-card">
+                        <header>
+                            <h3>Queue update</h3>
+                            <time datetime="PT15M">15 min</time>
+                        </header>
+                        <p>Dr. Hireche Anes is currently with patient #1. Your reservation is still active.</p>
+                    </article>
+                </div>
+            </section>
+        </main>
     </div>
 
-    <section class="home_content">
-        <div class="welcome">
-            <div class="welcome_message">
-                <h1 id="welcomeMessage">Welcome</h1>
-                <p>Your session is stored in a cookie and verified through <code>/auth/me</code>.</p>
-            </div>
-        </div>
+    <div class="overlay" id="modalOverlay" hidden></div>
 
-        <div class="trust" id="sessionCards">
-            <div class="trust_item">
-                <h3>Status</h3>
-                <p id="sessionState">Loading...</p>
-            </div>
-            <div class="trust_item">
-                <h3>Account</h3>
-                <p id="accountId">-</p>
-            </div>
-            <div class="trust_item">
-                <h3>Email</h3>
-                <p id="accountEmail">-</p>
-            </div>
-            <div class="trust_item">
-                <h3>Role</h3>
-                <p id="accountRole">-</p>
-            </div>
+    <section class="confirm-dialog" id="cancelDialog" role="dialog" aria-modal="true" aria-labelledby="cancelDialogTitle" hidden>
+        <div>
+            <p class="eyebrow">Confirm action</p>
+            <h2 id="cancelDialogTitle">Cancel reservation</h2>
+            <p>Cancel your reservation with <strong id="cancelDoctorName">this doctor</strong>?</p>
+        </div>
+        <div class="button-row">
+            <button type="button" class="button button-danger" id="confirmCancelBtn">Yes, cancel</button>
+            <button type="button" class="button button-secondary" id="closeCancelDialogBtn">No, keep it</button>
         </div>
     </section>
 
-    <script>
-        const API_URL = window.location.origin && window.location.origin !== 'null'
-            ? window.location.origin
-            : 'http://localhost:8080';
-
-        async function requireSession() {
-            const response = await fetch(`${API_URL}/auth/me`, {
-                credentials: 'include'
-            });
-
-            if (!response.ok) {
-                window.location.href = 'Welcome.html';
-                return null;
-            }
-
-            return response.json();
-        }
-
-        async function loadSession() {
-            const session = await requireSession();
-            if (!session) {
-                return;
-            }
-
-            const roleLabel = session.role.charAt(0).toUpperCase() + session.role.slice(1);
-
-            document.getElementById('sidebarUserName').textContent = session.email;
-            document.getElementById('sidebarUserRole').textContent = roleLabel;
-            document.getElementById('welcomeMessage').textContent = `Welcome, ${session.email}!`;
-            document.getElementById('sessionState').textContent = 'Signed in and verified by the backend.';
-            document.getElementById('accountId').textContent = `Account ID: ${session.account_id}`;
-            document.getElementById('accountEmail').textContent = session.email;
-            document.getElementById('accountRole').textContent = roleLabel;
-        }
-
-        async function handleLogout(event) {
-            event.preventDefault();
-
-            await fetch(`${API_URL}/auth/logout`, {
-                method: 'POST',
-                credentials: 'include'
-            });
-
-            window.location.href = 'Welcome.html';
-        }
-
-        document.getElementById('logoutBtn').addEventListener('click', handleLogout);
-        document.getElementById('homeBtn').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-        document.getElementById('sessionBtn').addEventListener('click', async () => {
-            const session = await requireSession();
-            if (session) {
-                alert(`Signed in as ${session.email} (${session.role})`);
-            }
-        });
-
-        document.addEventListener('DOMContentLoaded', loadSession);
-    </script>
+    <script src="js/app.js"></script>
 </body>
-
 </html>
