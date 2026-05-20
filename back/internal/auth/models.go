@@ -8,7 +8,7 @@ type Account struct {
 	PhoneNumber  string
 	Email        string
 	PasswordHash string
-	Role         string
+	Role         string `json:"role"`
 }
 
 type SignUpRequest struct {
