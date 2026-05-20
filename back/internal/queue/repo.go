@@ -25,7 +25,6 @@ func (r *Repository) Create(queue *Queue) error {
 		queue.MaxSize,
 		queue.QueueCurrentSize,
 		queue.QueueIndex,
-		queue.QueueState,
 		queue.SpecialityID,
 	)
 	if err != nil {
@@ -55,10 +54,6 @@ func (r *Repository) Update(queueID int64, req QueueUpdateRequest) error {
 	if req.QueueIndex != nil {
 		assignments = append(assignments, "queue_index = ?")
 		args = append(args, *req.QueueIndex)
-	}
-	if req.QueueState != nil {
-		assignments = append(assignments, "queue_state = ?")
-		args = append(args, *req.QueueState)
 	}
 	if req.SpecialityID != nil {
 		assignments = append(assignments, "speciality_id = ?")
@@ -93,9 +88,8 @@ func (r *Repository) GetByID(id int64) (*Queue, error) {
 	}
 
 	var queue Queue
-	var queueState sql.NullString
 	err := r.db.QueryRow(
-		`SELECT id_queue, queue_maxSize, queue_size, queue_index, queue_state, speciality_id
+		`SELECT id_queue, queue_maxSize, queue_size, queue_index, speciality_id
 		 FROM queues
 		 WHERE id_queue = ?`,
 		id,
@@ -104,7 +98,6 @@ func (r *Repository) GetByID(id int64) (*Queue, error) {
 		&queue.MaxSize,
 		&queue.QueueCurrentSize,
 		&queue.QueueIndex,
-		&queueState,
 		&queue.SpecialityID,
 	)
 	if err != nil {
@@ -114,16 +107,12 @@ func (r *Repository) GetByID(id int64) (*Queue, error) {
 		return nil, err
 	}
 
-	if queueState.Valid {
-		queue.QueueState = queueState.String
-	}
-
 	return &queue, nil
 }
 
 func (r *Repository) ListAll() ([]Queue, error) {
 	rows, err := r.db.Query(
-		`SELECT id_queue, queue_maxSize, queue_size, queue_index, queue_state, speciality_id
+		`SELECT id_queue, queue_maxSize, queue_size, queue_index, speciality_id
 		 FROM queues
 		 ORDER BY id_queue ASC`,
 	)
@@ -135,20 +124,14 @@ func (r *Repository) ListAll() ([]Queue, error) {
 	queues := make([]Queue, 0)
 	for rows.Next() {
 		var queue Queue
-		var queueState sql.NullString
 		if err := rows.Scan(
 			&queue.ID,
 			&queue.MaxSize,
 			&queue.QueueCurrentSize,
 			&queue.QueueIndex,
-			&queueState,
 			&queue.SpecialityID,
 		); err != nil {
 			return nil, err
-		}
-
-		if queueState.Valid {
-			queue.QueueState = queueState.String
 		}
 		queues = append(queues, queue)
 	}

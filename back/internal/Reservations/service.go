@@ -29,6 +29,14 @@ func (s *Service) ListByAccountID(accountID int64) ([]Reservation, error) {
 	return s.repo.ListByAccountID(accountID)
 }
 
+func (s *Service) ListByQueueID(queueID int64) ([]Reservation, error) {
+	if queueID <= 0 {
+		return nil, errors.New("invalid queue id")
+	}
+
+	return s.repo.ListByQueueID(queueID)
+}
+
 func (s *Service) Create(accountID, queueID int64, timeDue time.Time) (*Reservation, error) {
 	if accountID <= 0 {
 		return nil, errors.New("invalid account id")
@@ -44,6 +52,7 @@ func (s *Service) Create(accountID, queueID int64, timeDue time.Time) (*Reservat
 		TimeCreated: time.Now().UTC(),
 		TimeDue:     timeDue.UTC(),
 		QueueID:     queueID,
+		Status:      "Waiting",
 		AccountID:   accountID,
 	}
 

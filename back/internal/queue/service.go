@@ -1,13 +1,17 @@
 package queue
 
-import "errors"
+import (
+	"clinic/internal/specialities"
+	"errors"
+)
 
 type Service struct {
-	repo *Repository
+	repo                *Repository
+	specialitiesService *specialities.Service
 }
 
-func NewService(repo *Repository) *Service {
-	return &Service{repo: repo}
+func NewService(repo *Repository, sp *specialities.Service) *Service {
+	return &Service{repo: repo, specialitiesService: sp}
 }
 
 func (s *Service) GetByID(id int64) (*Queue, error) {
@@ -19,7 +23,19 @@ func (s *Service) GetByID(id int64) (*Queue, error) {
 }
 
 func (s *Service) ListAll() ([]Queue, error) {
-	return s.repo.ListAll()
+	queues, err := s.repo.ListAll()
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range queues {
+		name, err := s.specialitiesService.GetNameByID(queues[i].SpecialityID)
+		if err == nil {
+			queues[i].SpecialityName = name
+		}
+	}
+
+	return queues, nil
 }
 
 func (s *Service) Create(req Queue) (*Queue, error) {
@@ -32,9 +48,6 @@ func (s *Service) Create(req Queue) (*Queue, error) {
 	if req.QueueIndex < 0 {
 		return nil, errors.New("queue_index cannot be negative")
 	}
-	if req.QueueState == "" {
-		return nil, errors.New("queue_state is required")
-	}
 	if req.SpecialityID <= 0 {
 		return nil, errors.New("speciality_id is required")
 	}
@@ -46,7 +59,6 @@ func (s *Service) Create(req Queue) (*Queue, error) {
 		MaxSize:          req.MaxSize,
 		QueueCurrentSize: req.QueueCurrentSize,
 		QueueIndex:       req.QueueIndex,
-		QueueState:       req.QueueState,
 		SpecialityID:     req.SpecialityID,
 	}
 
@@ -71,9 +83,6 @@ func (s *Service) Update(req QueueUpdateRequest) (*Queue, error) {
 	if req.QueueIndex != nil && *req.QueueIndex < 0 {
 		return nil, errors.New("queue_index cannot be negative")
 	}
-	if req.QueueState != nil && *req.QueueState == "" {
-		return nil, errors.New("queue_state is required")
-	}
 	if req.SpecialityID != nil && *req.SpecialityID <= 0 {
 		return nil, errors.New("speciality_id is required")
 	}
@@ -91,9 +100,6 @@ func (s *Service) Update(req QueueUpdateRequest) (*Queue, error) {
 	}
 	if req.QueueIndex != nil {
 		current.QueueIndex = *req.QueueIndex
-	}
-	if req.QueueState != nil {
-		current.QueueState = *req.QueueState
 	}
 	if req.SpecialityID != nil {
 		current.SpecialityID = *req.SpecialityID

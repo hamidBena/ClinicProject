@@ -1,5 +1,6 @@
-add reservation status
+add reservation status  -- done
 
-remove queue state
+remove queue state  --done
 
-make a helper function for the queue display
+make a helper function for the queue display    --done
+

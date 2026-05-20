@@ -24,12 +24,13 @@ func (r *Repository) Create(reservation *Reservation) error {
 	timeDue := reservation.TimeDue.UTC().Format(time.RFC3339Nano)
 
 	result, err := r.db.Exec(
-		`INSERT INTO reservations (timeCreated, timeDue, queue_id, account_id)
-		 VALUES (?, ?, ?, ?)`,
+		`INSERT INTO reservations (timeCreated, timeDue, queue_id, account_id, status)
+		 VALUES (?, ?, ?, ?, ?)`,
 		timeCreated,
 		timeDue,
 		reservation.QueueID,
 		reservation.AccountID,
+		reservation.Status,
 	)
 	if err != nil {
 		return err
@@ -57,6 +58,10 @@ func (r *Repository) Update(accountID int64, req ReservationUpdateRequest) error
 	if req.QueueID != nil {
 		assignments = append(assignments, "queue_id = ?")
 		args = append(args, *req.QueueID)
+	}
+	if req.Status != nil {
+		assignments = append(assignments, "status = ?")
+		args = append(args, *req.Status)
 	}
 
 	if len(assignments) == 0 {
@@ -89,8 +94,9 @@ func (r *Repository) GetByID(id int64) (*Reservation, error) {
 	var reservation Reservation
 	var timeCreated string
 	var timeDue string
+	var status string
 	err := r.db.QueryRow(
-		`SELECT id_reservation, timeCreated, timeDue, queue_id, account_id
+		`SELECT id_reservation, timeCreated, timeDue, queue_id, account_id, status
 		 FROM reservations
 		 WHERE id_reservation = ?`,
 		id,
@@ -100,6 +106,7 @@ func (r *Repository) GetByID(id int64) (*Reservation, error) {
 		&timeDue,
 		&reservation.QueueID,
 		&reservation.AccountID,
+		&status,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -119,6 +126,7 @@ func (r *Repository) GetByID(id int64) (*Reservation, error) {
 
 	reservation.TimeCreated = parsedTimeCreated
 	reservation.TimeDue = parsedTimeDue
+	reservation.Status = status
 
 	return &reservation, nil
 }
@@ -129,7 +137,7 @@ func (r *Repository) ListByAccountID(accountID int64) ([]Reservation, error) {
 	}
 
 	rows, err := r.db.Query(
-		`SELECT id_reservation, timeCreated, timeDue, queue_id, account_id
+		`SELECT id_reservation, timeCreated, timeDue, queue_id, account_id, status
 		 FROM reservations
 		 WHERE account_id = ?
 		 ORDER BY timeCreated DESC`,
@@ -145,12 +153,14 @@ func (r *Repository) ListByAccountID(accountID int64) ([]Reservation, error) {
 		var reservation Reservation
 		var timeCreated string
 		var timeDue string
+		var status string
 		if err := rows.Scan(
 			&reservation.ID,
 			&timeCreated,
 			&timeDue,
 			&reservation.QueueID,
 			&reservation.AccountID,
+			&status,
 		); err != nil {
 			return nil, err
 		}
@@ -166,6 +176,63 @@ func (r *Repository) ListByAccountID(accountID int64) ([]Reservation, error) {
 
 		reservation.TimeCreated = parsedTimeCreated
 		reservation.TimeDue = parsedTimeDue
+		reservation.Status = status
+		reservations = append(reservations, reservation)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return reservations, nil
+}
+
+func (r *Repository) ListByQueueID(queueID int64) ([]Reservation, error) {
+	if queueID <= 0 {
+		return nil, errors.New("invalid queue id")
+	}
+
+	rows, err := r.db.Query(
+		`SELECT id_reservation, timeCreated, timeDue, queue_id, account_id, status
+		 FROM reservations
+		 WHERE queue_id = ?
+		 ORDER BY timeCreated DESC`,
+		queueID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	reservations := make([]Reservation, 0)
+	for rows.Next() {
+		var reservation Reservation
+		var timeCreated string
+		var timeDue string
+		var status string
+		if err := rows.Scan(
+			&reservation.ID,
+			&timeCreated,
+			&timeDue,
+			&reservation.QueueID,
+			&reservation.AccountID,
+			&status,
+		); err != nil {
+			return nil, err
+		}
+
+		parsedTimeCreated, err := parseReservationTime(timeCreated)
+		if err != nil {
+			return nil, err
+		}
+		parsedTimeDue, err := parseReservationTime(timeDue)
+		if err != nil {
+			return nil, err
+		}
+
+		reservation.TimeCreated = parsedTimeCreated
+		reservation.TimeDue = parsedTimeDue
+		reservation.Status = status
 		reservations = append(reservations, reservation)
 	}
 
