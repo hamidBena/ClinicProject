@@ -83,7 +83,7 @@ async function handleLogin(event) {
             throw new Error(data.message || "Login failed");
         }
 
-        const role = data.role;
+        const role = data.Role;
 
         if (role === "admin") {
             window.location.href = "Admin.html";
