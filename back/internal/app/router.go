@@ -4,6 +4,7 @@ import (
 	reservations "clinic/internal/Reservations"
 	"clinic/internal/auth"
 	"clinic/internal/doctor"
+	"clinic/internal/notifications"
 	"clinic/internal/patient"
 	"clinic/internal/queue"
 	"clinic/internal/specialities"
@@ -43,23 +44,34 @@ func Endpoints() []Endpoint {
 
 		{Method: "GET", Path: "/specialities"},
 		{Method: "GET", Path: "/specialities/{id}"},
+
+		{Method: "GET|POST", Path: "/notifications"},
+		{Method: "GET|POST", Path: "/profile/avatar"},
+		{Method: "GET|POST", Path: "/patients/medical-file"},
+		{Method: "GET|POST", Path: "/doctors/certificate"},
 	}
 }
 
 func NewRouter(db *sql.DB) *http.ServeMux {
 	authRepo := auth.NewRepository(db)
-	authService := auth.NewService(authRepo)
+	notificationsRepo := notifications.NewRepository(db)
+	notificationsService := notifications.NewService(notificationsRepo)
+	notificationsManager := notifications.NewManager(notificationsService)
+
+	authService := auth.NewService(authRepo, notificationsManager)
 	sessionStore := auth.NewSessionStore()
 	authHandler := auth.NewHandler(authService, sessionStore)
 
 	userRepo := user.NewRepository(db, authRepo)
+	userService := user.NewService(userRepo, notificationsManager)
+	userHandler := user.NewHandler(userService)
 
 	patientRepo := patient.NewRepository(db, userRepo)
-	patientService := patient.NewService(patientRepo)
+	patientService := patient.NewService(patientRepo, notificationsManager)
 	patientHandler := patient.NewHandler(patientService)
 
 	doctorRepo := doctor.NewRepository(db, userRepo)
-	doctorService := doctor.NewService(doctorRepo)
+	doctorService := doctor.NewService(doctorRepo, notificationsManager)
 	doctorHandler := doctor.NewHandler(doctorService)
 
 	specialitiesRepo := specialities.NewRepository(db)
@@ -71,10 +83,16 @@ func NewRouter(db *sql.DB) *http.ServeMux {
 	queueHandler := queue.NewHandler(queueService)
 
 	reservationsRepo := reservations.NewRepository(db)
-	reservationsService := reservations.NewService(reservationsRepo)
+	reservationsService := reservations.NewService(reservationsRepo, notificationsManager)
 	reservationsHandler := reservations.NewHandler(reservationsService)
+	notificationsHandler := notifications.NewHandler(notificationsService)
+
+	// Serve uploaded files from the uploads directory (development only).
+	uploadsDir := filepath.Join("uploads")
+	_ = os.MkdirAll(uploadsDir, 0755)
 
 	router := http.NewServeMux()
+	router.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir(uploadsDir))))
 	router.HandleFunc("/auth/register", authHandler.Register)
 	router.HandleFunc("/auth/login", authHandler.Login)
 	router.HandleFunc("/auth/me", auth.AuthMiddleware(sessionStore, authHandler.Me))
@@ -82,18 +100,70 @@ func NewRouter(db *sql.DB) *http.ServeMux {
 	router.HandleFunc("/auth/forgot-password", authHandler.ForgotPassword)
 	router.HandleFunc("/auth/change-password", auth.AuthMiddleware(sessionStore, authHandler.ChangePassword))
 	router.HandleFunc("/patients/me", auth.AuthMiddleware(sessionStore, patientHandler.Profile))
+	router.HandleFunc("/patients/medical-file", auth.AuthMiddleware(sessionStore, patientHandler.UploadMedicalFile))
 	router.HandleFunc("/doctors/me", auth.AuthMiddleware(sessionStore, doctorHandler.Profile))
 	router.HandleFunc("/doctors/availability", auth.AuthMiddleware(sessionStore, doctorHandler.SetAvailability))
 	router.HandleFunc("/queues", queueHandler.Queues)
+	router.HandleFunc("/profile/avatar", auth.AuthMiddleware(sessionStore, userHandler.UploadAvatar))
+	router.HandleFunc("/doctors/certificate", auth.AuthMiddleware(sessionStore, doctorHandler.UploadCertificate))
 	router.HandleFunc("/reservations", auth.AuthMiddleware(sessionStore, reservationsHandler.Reservations))
 	router.HandleFunc("/reservations/queue/", auth.AuthMiddleware(sessionStore, reservationsHandler.ListByQueueID))
+	router.HandleFunc("/notifications", auth.AuthMiddleware(sessionStore, notificationsHandler.Notifications))
 	router.HandleFunc("/specialities", specialitiesHandler.ListAll)
 	router.HandleFunc("/specialities/", specialitiesHandler.GetByID)
 
 	adminHandler := func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("admin area"))
 	}
+	// Serve Admin.html only to admin users
+	adminHTMLHandler := func(w http.ResponseWriter, r *http.Request) {
+		frontDir := resolveFrontDir()
+		file, err := frontDir.Open("Admin.html")
+		if err != nil {
+			if errors.Is(err, fs.ErrNotExist) {
+				http.NotFound(w, r)
+				return
+			}
+			http.Error(w, "unable to open file", http.StatusInternalServerError)
+			return
+		}
+		defer file.Close()
+
+		info, err := file.Stat()
+		if err != nil {
+			http.Error(w, "unable to read file", http.StatusInternalServerError)
+			return
+		}
+
+		http.ServeContent(w, r, info.Name(), info.ModTime(), file.(io.ReadSeeker))
+	}
+
+	router.HandleFunc("/Admin.html", auth.AuthMiddleware(sessionStore, auth.RequireRoles([]string{"admin"}, adminHTMLHandler)))
 	router.HandleFunc("/admin", auth.AuthMiddleware(sessionStore, auth.RequireRoles([]string{"admin"}, adminHandler)))
+	// Serve MedicalStaff.html only to doctors and admins
+	medicalStaffHTMLHandler := func(w http.ResponseWriter, r *http.Request) {
+		frontDir := resolveFrontDir()
+		file, err := frontDir.Open("MedicalStaff.html")
+		if err != nil {
+			if errors.Is(err, fs.ErrNotExist) {
+				http.NotFound(w, r)
+				return
+			}
+			http.Error(w, "unable to open file", http.StatusInternalServerError)
+			return
+		}
+		defer file.Close()
+
+		info, err := file.Stat()
+		if err != nil {
+			http.Error(w, "unable to read file", http.StatusInternalServerError)
+			return
+		}
+
+		http.ServeContent(w, r, info.Name(), info.ModTime(), file.(io.ReadSeeker))
+	}
+
+	router.HandleFunc("/MedicalStaff.html", auth.AuthMiddleware(sessionStore, auth.RequireRoles([]string{"admin", "doctor"}, medicalStaffHTMLHandler)))
 	router.HandleFunc("/", staticFrontHandler())
 
 	return router

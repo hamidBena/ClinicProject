@@ -21,13 +21,10 @@ func (r *Repository) Create(reservation *Reservation) error {
 	}
 
 	timeCreated := reservation.TimeCreated.UTC().Format(time.RFC3339Nano)
-	timeDue := reservation.TimeDue.UTC().Format(time.RFC3339Nano)
-
 	result, err := r.db.Exec(
-		`INSERT INTO reservations (timeCreated, timeDue, queue_id, account_id, status)
-		 VALUES (?, ?, ?, ?, ?)`,
+		`INSERT INTO reservations (timeCreated, queue_id, account_id, status)
+		 VALUES (?, ?, ?, ?)`,
 		timeCreated,
-		timeDue,
 		reservation.QueueID,
 		reservation.AccountID,
 		reservation.Status,
@@ -51,10 +48,7 @@ func (r *Repository) Update(accountID int64, req ReservationUpdateRequest) error
 	assignments := make([]string, 0)
 	args := make([]interface{}, 0)
 
-	if req.TimeDue != nil {
-		assignments = append(assignments, "timeDue = ?")
-		args = append(args, req.TimeDue.UTC().Format(time.RFC3339Nano))
-	}
+	// timeDue removed
 	if req.QueueID != nil {
 		assignments = append(assignments, "queue_id = ?")
 		args = append(args, *req.QueueID)
@@ -92,16 +86,15 @@ func (r *Repository) GetByID(id int64) (*Reservation, error) {
 	}
 
 	var reservation Reservation
-	var timeCreated, timeDue, status string
+	var timeCreated, status string
 	err := r.db.QueryRow(
-		`SELECT id_reservation, timeCreated, timeDue, queue_id, account_id, status
+		`SELECT id_reservation, timeCreated, queue_id, account_id, status
 		 FROM reservations
 		 WHERE id_reservation = ?`,
 		id,
 	).Scan(
 		&reservation.ID,
 		&timeCreated,
-		&timeDue,
 		&reservation.QueueID,
 		&reservation.AccountID,
 		&status,
@@ -114,7 +107,6 @@ func (r *Repository) GetByID(id int64) (*Reservation, error) {
 	}
 
 	reservation.TimeCreated, _ = parseReservationTime(timeCreated)
-	reservation.TimeDue, _ = parseReservationTime(timeDue)
 	reservation.Status = status
 	return &reservation, nil
 }
@@ -125,9 +117,9 @@ func (r *Repository) ListByAccountID(accountID int64) ([]Reservation, error) {
 	}
 
 	rows, err := r.db.Query(
-		`SELECT r.id_reservation, r.timeCreated, r.timeDue, r.queue_id, r.account_id, r.status,
-		        COALESCE(s.name, ''),
-		        COALESCE(a.first_name || ' ' || a.last_name, '')
+		`SELECT r.id_reservation, r.timeCreated, r.queue_id, r.account_id, r.status,
+				COALESCE(s.name, ''),
+				COALESCE(a.first_name || ' ' || a.last_name, '')
 		 FROM reservations r
 		 LEFT JOIN queues q ON q.id_queue = r.queue_id
 		 LEFT JOIN specialities s ON s.id_speciality = q.speciality_id
@@ -145,12 +137,11 @@ func (r *Repository) ListByAccountID(accountID int64) ([]Reservation, error) {
 	reservations := make([]Reservation, 0)
 	for rows.Next() {
 		var res Reservation
-		var timeCreated, timeDue, status string
+		var timeCreated, status string
 		var specialityName, doctorName string
 		if err := rows.Scan(
 			&res.ID,
 			&timeCreated,
-			&timeDue,
 			&res.QueueID,
 			&res.AccountID,
 			&status,
@@ -161,7 +152,6 @@ func (r *Repository) ListByAccountID(accountID int64) ([]Reservation, error) {
 		}
 
 		res.TimeCreated, _ = parseReservationTime(timeCreated)
-		res.TimeDue, _ = parseReservationTime(timeDue)
 		res.Status = status
 		res.SpecialityName = specialityName
 		res.DoctorName = strings.TrimSpace(doctorName)
@@ -177,12 +167,12 @@ func (r *Repository) ListByQueueID(queueID int64) ([]Reservation, error) {
 	}
 
 	rows, err := r.db.Query(
-		`SELECT r.id_reservation, r.timeCreated, r.timeDue, r.queue_id, r.account_id, r.status,
-                a.first_name || ' ' || a.last_name AS patient_name
-         FROM reservations r
-         JOIN accounts a ON a.id_account = r.account_id
-         WHERE r.queue_id = ?
-         ORDER BY r.timeCreated ASC`,
+		`SELECT r.id_reservation, r.timeCreated, r.queue_id, r.account_id, r.status,
+				a.first_name || ' ' || a.last_name AS patient_name
+		 FROM reservations r
+		 JOIN accounts a ON a.id_account = r.account_id
+		 WHERE r.queue_id = ?
+		 ORDER BY r.timeCreated ASC`,
 		queueID,
 	)
 	if err != nil {
@@ -193,11 +183,10 @@ func (r *Repository) ListByQueueID(queueID int64) ([]Reservation, error) {
 	reservations := make([]Reservation, 0)
 	for rows.Next() {
 		var res Reservation
-		var timeCreated, timeDue, status, patientName string
+		var timeCreated, status, patientName string
 		if err := rows.Scan(
 			&res.ID,
 			&timeCreated,
-			&timeDue,
 			&res.QueueID,
 			&res.AccountID,
 			&status,
@@ -207,7 +196,6 @@ func (r *Repository) ListByQueueID(queueID int64) ([]Reservation, error) {
 		}
 
 		res.TimeCreated, _ = parseReservationTime(timeCreated)
-		res.TimeDue, _ = parseReservationTime(timeDue)
 		res.Status = status
 		res.PatientName = patientName
 		reservations = append(reservations, res)

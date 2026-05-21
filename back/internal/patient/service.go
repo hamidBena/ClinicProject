@@ -3,14 +3,17 @@ package patient
 import (
 	"errors"
 	"strings"
+
+	"clinic/internal/notifications"
 )
 
 type Service struct {
-	repo *Repository
+	repo     *Repository
+	notifier *notifications.Manager
 }
 
-func NewService(repo *Repository) *Service {
-	return &Service{repo: repo}
+func NewService(repo *Repository, notifier *notifications.Manager) *Service {
+	return &Service{repo: repo, notifier: notifier}
 }
 
 func (s *Service) GetByAccountID(accountID int) (*Patient, error) {
@@ -48,17 +51,32 @@ func (s *Service) UpdateProfile(accountID int, req ProfileUpdateRequest) (*Patie
 	if req.InsuranceNumber == "" {
 		req.InsuranceNumber = current.InsuranceNumber
 	}
-	if req.Address == "" {
-		req.Address = current.Address
-	}
-	if req.Birthday == "" {
-		req.Birthday = current.Birthday
-	}
 
 	err = s.repo.UpdatePatientProfile(accountID, req)
 	if err != nil {
 		return nil, err
 	}
+	if s.notifier != nil {
+		_, _ = s.notifier.ProfileUpdated(int64(accountID))
+	}
 
 	return s.repo.GetPatientByAccountID(accountID)
+}
+
+func (s *Service) UpdateMedicalFile(accountID int64, medicalFileURL string) error {
+	if accountID <= 0 {
+		return errors.New("invalid account id")
+	}
+	medicalFileURL = strings.TrimSpace(medicalFileURL)
+	if medicalFileURL == "" {
+		return errors.New("medical file url is required")
+	}
+
+	if err := s.repo.UpdateMedicalFileURL(int(accountID), medicalFileURL); err != nil {
+		return err
+	}
+	if s.notifier != nil {
+		_, _ = s.notifier.Send(accountID, "Your medical file was uploaded successfully.")
+	}
+	return nil
 }

@@ -7,12 +7,17 @@ import (
 	"clinic/pkg/utils"
 )
 
-type Service struct {
-	repo *Repository
+type Notifier interface {
+	Notify(accountID int64, message string) error
 }
 
-func NewService(r *Repository) *Service {
-	return &Service{repo: r}
+type Service struct {
+	repo     *Repository
+	notifier Notifier
+}
+
+func NewService(r *Repository, notifier Notifier) *Service {
+	return &Service{repo: r, notifier: notifier}
 }
 
 func (s *Service) RegisterPatient(request SignUpRequestPatient) error {
@@ -25,7 +30,13 @@ func (s *Service) RegisterPatient(request SignUpRequestPatient) error {
 	if err != nil {
 		return err
 	}
-	return s.repo.CreatePatient(accountID, request.InsuranceNumber)
+	if err := s.repo.CreatePatient(accountID, request.InsuranceNumber); err != nil {
+		return err
+	}
+	if s.notifier != nil {
+		_ = s.notifier.Notify(accountID, "Welcome to ClinicProject. Your patient account is ready.")
+	}
+	return nil
 }
 
 func (s *Service) RegisterDoctor(request SignUpRequestDoctor) error {
@@ -47,7 +58,13 @@ func (s *Service) RegisterDoctor(request SignUpRequestDoctor) error {
 	if err != nil {
 		return err
 	}
-	return s.repo.CreateDoctor(accountID, request.Speciality_id, request.Address)
+	if err := s.repo.CreateDoctor(accountID, request.Speciality_id, request.Address); err != nil {
+		return err
+	}
+	if s.notifier != nil {
+		_ = s.notifier.Notify(accountID, "Welcome to ClinicProject. Your doctor account is ready.")
+	}
+	return nil
 }
 
 func (s *Service) Login(email, password string) (*Account, error) {
@@ -135,5 +152,11 @@ func (s *Service) ChangePassword(accountID int64, currentPassword, newPassword s
 		return err
 	}
 
-	return s.repo.UpdatePasswordHash(accountID, newHash)
+	if err := s.repo.UpdatePasswordHash(accountID, newHash); err != nil {
+		return err
+	}
+	if s.notifier != nil {
+		_ = s.notifier.Notify(accountID, "Your password was changed successfully.")
+	}
+	return nil
 }

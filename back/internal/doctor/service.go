@@ -3,16 +3,36 @@ package doctor
 import (
 	"errors"
 	"strings"
+
+	"clinic/internal/notifications"
 )
 
 // Service handles doctor profile business logic
 type Service struct {
-	repo *Repository
+	repo     *Repository
+	notifier *notifications.Manager
 }
 
 // NewService creates a new doctor service
-func NewService(repo *Repository) *Service {
-	return &Service{repo: repo}
+func NewService(repo *Repository, notifier *notifications.Manager) *Service {
+	return &Service{repo: repo, notifier: notifier}
+}
+
+func (s *Service) UpdateCertificate(accountID int64, certificateURL string) error {
+	if accountID <= 0 {
+		return errors.New("invalid account id")
+	}
+	certificateURL = strings.TrimSpace(certificateURL)
+	if certificateURL == "" {
+		return errors.New("certificate url is required")
+	}
+	if err := s.repo.UpdateCertificateURL(accountID, certificateURL); err != nil {
+		return err
+	}
+	if s.notifier != nil {
+		_, _ = s.notifier.Send(accountID, "Your certificate was uploaded successfully.")
+	}
+	return nil
 }
 
 // GetByAccountID retrieves a doctor profile by account ID
@@ -67,6 +87,9 @@ func (s *Service) UpdateProfile(accountID int, req ProfileUpdateRequest) (*Docto
 	err = s.repo.UpdateDoctorProfile(accountID, req)
 	if err != nil {
 		return nil, err
+	}
+	if s.notifier != nil {
+		_, _ = s.notifier.ProfileUpdated(int64(accountID))
 	}
 
 	// Refetch and return

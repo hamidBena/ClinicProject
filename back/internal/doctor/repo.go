@@ -36,8 +36,9 @@ func (r *Repository) GetDoctorByAccountID(accountID int) (*Doctor, error) {
 	var address string
 	var specialityID int64
 	var availability string
-	row := r.db.QueryRow("SELECT address, speciality_id, availability FROM doctors WHERE account_id = ?", accountID)
-	err = row.Scan(&address, &specialityID, &availability)
+	var certificateURL string
+	row := r.db.QueryRow("SELECT address, speciality_id, availability, COALESCE(certificate_url, '') FROM doctors WHERE account_id = ?", accountID)
+	err = row.Scan(&address, &specialityID, &availability, &certificateURL)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.New("doctor profile not found")
@@ -46,10 +47,11 @@ func (r *Repository) GetDoctorByAccountID(accountID int) (*Doctor, error) {
 	}
 
 	return &Doctor{
-		User:         *usr,
-		Address:      address,
-		SpecialityID: specialityID,
-		Availability: availability,
+		User:           *usr,
+		Address:        address,
+		SpecialityID:   specialityID,
+		Availability:   availability,
+		CertificateURL: certificateURL,
 	}, nil
 }
 
@@ -95,4 +97,10 @@ func (r *Repository) SpecialityExists(id int64) (bool, error) {
 		)
 	`, id).Scan(&exists)
 	return exists, err
+}
+
+// UpdateCertificateURL sets the certificate URL for the given doctor's account
+func (r *Repository) UpdateCertificateURL(accountID int64, certificateURL string) error {
+	_, err := r.db.Exec(`UPDATE doctors SET certificate_url = ? WHERE account_id = ?`, certificateURL, accountID)
+	return err
 }

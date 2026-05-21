@@ -3,6 +3,7 @@ package auth
 import (
 	"database/sql"
 	"errors"
+	"strings"
 
 	"clinic/pkg/utils"
 )
@@ -16,17 +17,21 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) CreateAccount(a SignUpRequest) (int64, error) {
+	// normalize email to be case-insensitive
+	a.Email = strings.ToLower(strings.TrimSpace(a.Email))
+	a.Gender = strings.TrimSpace(a.Gender)
+
 	hashedPassword, err := utils.HashPassword(a.Password)
 	if err != nil {
 		return 0, err
 	}
 
 	query := `
-		INSERT INTO accounts (username, first_name, last_name, phone_number, email, password_hash)
-		VALUES (?, ?, ?, ?, ?, ?)
+		INSERT INTO accounts (username, first_name, last_name, phone_number, gender, address, birthday, email, password_hash)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`
 
-	result, err := r.db.Exec(query, a.Username, a.FirstName, a.LastName, a.PhoneNumber, a.Email, hashedPassword)
+	result, err := r.db.Exec(query, a.Username, a.FirstName, a.LastName, a.PhoneNumber, a.Gender, a.Address, a.Birthday, a.Email, hashedPassword)
 	if err != nil {
 		if err.Error() == "UNIQUE constraint failed: accounts.email" {
 			return 0, errors.New("email already exists")
@@ -69,14 +74,15 @@ func (r *Repository) SpecialityExists(id int32) (bool, error) {
 }
 
 func (r *Repository) GetAccountByEmail(email string) (*Account, error) {
+	email = strings.ToLower(strings.TrimSpace(email))
 	var account Account
 	err := r.db.QueryRow(`
-		SELECT id_account, username, first_name, last_name, phone_number, email, password_hash
+		SELECT id_account, username, first_name, last_name, phone_number, COALESCE(gender, ''), COALESCE(address, ''), COALESCE(birthday, ''), email, password_hash, COALESCE(avatar_url, '')
 		FROM accounts
 		WHERE email = ?
 	`, email).Scan(&account.ID, &account.Username, &account.FirstName,
-		&account.LastName, &account.PhoneNumber, &account.Email,
-		&account.PasswordHash)
+		&account.LastName, &account.PhoneNumber, &account.Gender, &account.Address, &account.Birthday, &account.Email,
+		&account.PasswordHash, &account.AvatarURL)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -91,12 +97,12 @@ func (r *Repository) GetAccountByEmail(email string) (*Account, error) {
 func (r *Repository) GetAccountByID(accountID int64) (*Account, error) {
 	var account Account
 	err := r.db.QueryRow(`
-		SELECT id_account, username, first_name, last_name, phone_number, email, password_hash
+		SELECT id_account, username, first_name, last_name, phone_number, COALESCE(gender, ''), COALESCE(address, ''), COALESCE(birthday, ''), email, password_hash, COALESCE(avatar_url, '')
 		FROM accounts
 		WHERE id_account = ?
 	`, accountID).Scan(&account.ID, &account.Username, &account.FirstName,
-		&account.LastName, &account.PhoneNumber, &account.Email,
-		&account.PasswordHash)
+		&account.LastName, &account.PhoneNumber, &account.Gender, &account.Address, &account.Birthday, &account.Email,
+		&account.PasswordHash, &account.AvatarURL)
 
 	if err != nil {
 		if err == sql.ErrNoRows {

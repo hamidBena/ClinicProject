@@ -6,9 +6,13 @@ type Account struct {
 	FirstName    string
 	LastName     string
 	PhoneNumber  string
+	Gender       string
+	Address      string
+	Birthday     string
 	Email        string
 	PasswordHash string
 	Role         string `json:"role"`
+	AvatarURL    string `json:"avatar_url,omitempty"`
 }
 
 type SignUpRequest struct {
@@ -16,6 +20,9 @@ type SignUpRequest struct {
 	FirstName   string `json:"first_name"`
 	LastName    string `json:"last_name"`
 	PhoneNumber string `json:"phone_number"`
+	Gender      string `json:"gender"`
+	Address     string `json:"address"`
+	Birthday    string `json:"birthday"`
 	Email       string `json:"email"`
 	Password    string `json:"password"`
 	Role        string `json:"role"`

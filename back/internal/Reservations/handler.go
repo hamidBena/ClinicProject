@@ -43,12 +43,7 @@ func (h *Handler) Reservations(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		timeDue := req.TimeDue
-		if timeDue.IsZero() {
-			timeDue = req.TimeDueAt
-		}
-
-		reservation, err := h.service.Create(accountID, req.QueueID, timeDue)
+		reservation, err := h.service.Create(accountID, req.QueueID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return

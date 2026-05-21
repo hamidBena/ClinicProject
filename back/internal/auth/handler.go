@@ -26,7 +26,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		SignUpRequest
 		InsuranceNumber string `json:"insurance_number"`
 		Speciality_id   int32  `json:"speciality_id"`
-		Address         string `json:"address"`
+		DoctorAddress   string `json:"doctor_address"`
 	}
 
 	var payload registerPayload
@@ -56,9 +56,9 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	case "doctor":
 		request := SignUpRequestDoctor{SignUpRequest: payload.SignUpRequest}
 		request.Speciality_id = payload.Speciality_id
-		request.Address = strings.TrimSpace(payload.Address)
+		request.Address = strings.TrimSpace(payload.DoctorAddress)
 		if request.Address == "" {
-			http.Error(w, "address is required for doctor", http.StatusBadRequest)
+			http.Error(w, "doctor_address is required for doctor", http.StatusBadRequest)
 			return
 		}
 		if err := h.service.RegisterDoctor(request); err != nil {
@@ -99,11 +99,14 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token := h.sessionStore.Create(int64(account.ID), account.Email, account.Role)
+	// Set Secure flag when request is over TLS
+	secureFlag := r.TLS != nil
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_token",
 		Value:    token,
 		Path:     "/",
 		HttpOnly: true,
+		Secure:   secureFlag,
 		SameSite: http.SameSiteLaxMode,
 		Expires:  time.Now().Add(24 * time.Hour),
 	})
@@ -144,6 +147,10 @@ func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 		cookie.Value = ""
 		cookie.Path = "/"
 		cookie.Expires = time.Unix(0, 0)
+		// Preserve Secure flag based on request
+		cookie.Secure = r.TLS != nil
+		cookie.HttpOnly = true
+		cookie.SameSite = http.SameSiteLaxMode
 		http.SetCookie(w, cookie)
 	}
 

@@ -3,14 +3,17 @@ package reservations
 import (
 	"errors"
 	"time"
+
+	"clinic/internal/notifications"
 )
 
 type Service struct {
-	repo *Repository
+	repo     *Repository
+	notifier *notifications.Manager
 }
 
-func NewService(repo *Repository) *Service {
-	return &Service{repo: repo}
+func NewService(repo *Repository, notifier *notifications.Manager) *Service {
+	return &Service{repo: repo, notifier: notifier}
 }
 
 func (s *Service) GetByID(id int64) (*Reservation, error) {
@@ -37,20 +40,16 @@ func (s *Service) ListByQueueID(queueID int64) ([]Reservation, error) {
 	return s.repo.ListByQueueID(queueID)
 }
 
-func (s *Service) Create(accountID, queueID int64, timeDue time.Time) (*Reservation, error) {
+func (s *Service) Create(accountID, queueID int64) (*Reservation, error) {
 	if accountID <= 0 {
 		return nil, errors.New("invalid account id")
 	}
 	if queueID <= 0 {
 		return nil, errors.New("invalid queue id")
 	}
-	if timeDue.IsZero() {
-		return nil, errors.New("timedue is required")
-	}
 
 	reservation := &Reservation{
 		TimeCreated: time.Now().UTC(),
-		TimeDue:     timeDue.UTC(),
 		QueueID:     queueID,
 		Status:      "Waiting",
 		AccountID:   accountID,
@@ -58,6 +57,9 @@ func (s *Service) Create(accountID, queueID int64, timeDue time.Time) (*Reservat
 
 	if err := s.repo.Create(reservation); err != nil {
 		return nil, err
+	}
+	if s.notifier != nil {
+		_, _ = s.notifier.ReservationCreated(accountID, reservation.ID, queueID)
 	}
 
 	return reservation, nil
@@ -69,9 +71,6 @@ func (s *Service) Update(accountID int64, req ReservationUpdateRequest) (*Reserv
 	}
 	if req.ID <= 0 {
 		return nil, errors.New("invalid reservation id")
-	}
-	if req.TimeDue != nil && req.TimeDue.IsZero() {
-		return nil, errors.New("timedue is required")
 	}
 	if req.QueueID != nil && *req.QueueID <= 0 {
 		return nil, errors.New("invalid queue id")
@@ -87,6 +86,11 @@ func (s *Service) Update(accountID int64, req ReservationUpdateRequest) (*Reserv
 
 	if err := s.repo.Update(accountID, req); err != nil {
 		return nil, err
+	}
+	if s.notifier != nil {
+		if updated, err := s.repo.GetByID(req.ID); err == nil {
+			_, _ = s.notifier.ReservationUpdated(accountID, updated.ID, updated.Status)
+		}
 	}
 
 	return s.repo.GetByID(req.ID)

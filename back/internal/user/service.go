@@ -3,14 +3,17 @@ package user
 import (
 	"errors"
 	"strings"
+
+	"clinic/internal/notifications"
 )
 
 type Service struct {
-	repo *Repository
+	repo     *Repository
+	notifier *notifications.Manager
 }
 
-func NewService(repo *Repository) *Service {
-	return &Service{repo: repo}
+func NewService(repo *Repository, notifier *notifications.Manager) *Service {
+	return &Service{repo: repo, notifier: notifier}
 }
 
 func (s *Service) GetByAccountID(accountID int) (*User, error) {
@@ -49,6 +52,27 @@ func (s *Service) UpdateProfile(accountID int, req ProfileUpdateRequest) (*User,
 	if err != nil {
 		return nil, err
 	}
+	if s.notifier != nil {
+		_, _ = s.notifier.ProfileUpdated(int64(accountID))
+	}
 
 	return s.repo.GetUserByAccountID(accountID)
+}
+
+func (s *Service) UpdateAvatar(accountID int64, avatarURL string) error {
+	if accountID <= 0 {
+		return errors.New("invalid account id")
+	}
+	avatarURL = strings.TrimSpace(avatarURL)
+	if avatarURL == "" {
+		return errors.New("avatar url is required")
+	}
+
+	if err := s.repo.UpdateAvatarURL(accountID, avatarURL); err != nil {
+		return err
+	}
+	if s.notifier != nil {
+		_, _ = s.notifier.Send(accountID, "Your profile picture was updated.")
+	}
+	return nil
 }

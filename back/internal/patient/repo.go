@@ -26,14 +26,13 @@ func (r *Repository) GetPatientByAccountID(accountID int) (*Patient, error) {
 	}
 
 	var insuranceNumber sql.NullString
-	var address sql.NullString
-	var birthday sql.NullString
+	var medicalFileURL sql.NullString
 
 	err = r.db.QueryRow(`
-        SELECT insurance_number, "address ", "birthday "
-        FROM patients
-        WHERE account_id = ?
-    `, accountID).Scan(&insuranceNumber, &address, &birthday)
+		SELECT insurance_number, COALESCE(medical_file_url, '')
+		FROM patients
+		WHERE account_id = ?
+	`, accountID).Scan(&insuranceNumber, &medicalFileURL)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.New("patient not found")
@@ -44,8 +43,7 @@ func (r *Repository) GetPatientByAccountID(accountID int) (*Patient, error) {
 	return &Patient{
 		User:            *u,
 		InsuranceNumber: insuranceNumber.String,
-		Address:         address.String,
-		Birthday:        birthday.String,
+		MedicalFileURL:  medicalFileURL.String,
 	}, nil
 }
 
@@ -56,11 +54,14 @@ func (r *Repository) UpdatePatientProfile(accountID int, update ProfileUpdateReq
 	}
 
 	_, err = r.db.Exec(`
-        UPDATE patients
-        SET insurance_number = ?,
-            "address "       = ?,
-            "birthday "      = ?
-        WHERE account_id = ?
-    `, update.InsuranceNumber, update.Address, update.Birthday, accountID)
+		UPDATE patients
+		SET insurance_number = ?
+		WHERE account_id = ?
+	`, update.InsuranceNumber, accountID)
+	return err
+}
+
+func (r *Repository) UpdateMedicalFileURL(accountID int, medicalFileURL string) error {
+	_, err := r.db.Exec(`UPDATE patients SET medical_file_url = ? WHERE account_id = ?`, medicalFileURL, accountID)
 	return err
 }

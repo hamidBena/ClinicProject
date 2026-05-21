@@ -20,12 +20,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const fileInput = document.getElementById("profile_photo");
     const fileName = document.getElementById("fileName");
     const pfpPreview = document.getElementById("pfpPreview");
+    let selectedProfilePhoto = null;
 
     pfpPreview.src = "images/Cardiology.png";
     fileName.textContent = "No file selected";
 
     fileInput.addEventListener("change", () => {
         const file = fileInput.files[0];
+        selectedProfilePhoto = file || null;
 
         if (!file) {
             fileName.textContent = "No file selected";
@@ -165,6 +167,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (!loginRes.ok) {
                 throw new Error("Account created but auto-login failed. Please log in manually.");
+            }
+
+            if (selectedProfilePhoto) {
+                const formData = new FormData();
+                formData.append("file", selectedProfilePhoto);
+
+                const avatarRes = await fetch(`${API_URL}/profile/avatar`, {
+                    method: "POST",
+                    credentials: "include",
+                    body: formData,
+                });
+
+                if (!avatarRes.ok) {
+                    throw new Error("Account created, but profile photo upload failed.");
+                }
             }
 
             redirecting = true;
