@@ -7,6 +7,7 @@ type Queue struct {
 	QueueIndex       int    `json:"queue_index"`
 	SpecialityID     int64  `json:"speciality_id"`
 	SpecialityName   string `json:"speciality_name,omitempty"`
+	DoctorName       string `json:"doctor_name,omitempty"`
 }
 
 type QueueUpdateRequest struct {

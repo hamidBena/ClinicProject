@@ -101,3 +101,4 @@ async function handleLogin(event) {
 }
 
 loginForm.addEventListener("submit", handleLogin);
+checkSession();

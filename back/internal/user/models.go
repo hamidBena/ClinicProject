@@ -1,14 +1,14 @@
 package user
 
 type User struct {
-	ID          int
-	AccountID   int
-	Username    string
-	FirstName   string
-	LastName    string
-	PhoneNumber string
-	Email       string
-	Role        string
+    ID          int    `json:"id"`
+    AccountID   int    `json:"account_id"`
+    Username    string `json:"username"`
+    FirstName   string `json:"first_name"`
+    LastName    string `json:"last_name"`
+    PhoneNumber string `json:"phone_number"`
+    Email       string `json:"email"`
+    Role        string `json:"role"`
 }
 
 type ProfileUpdateRequest struct {

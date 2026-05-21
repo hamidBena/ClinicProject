@@ -81,24 +81,6 @@ input:focus-visible {
     outline-offset: 3px;
 }
 
-.skip-link {
-    position: fixed;
-    top: 1rem;
-    left: 1rem;
-    z-index: 100;
-    transform: translateY(-150%);
-    border-radius: 999px;
-    background: var(--surface-strong);
-    color: white;
-    padding: 0.7rem 1rem;
-    text-decoration: none;
-    transition: transform var(--speed) ease;
-}
-
-.skip-link:focus {
-    transform: translateY(0);
-}
-
 .dashboard-shell {
     display: grid;
     grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
@@ -285,6 +267,7 @@ input:focus-visible {
         opacity: 0;
         transform: translateY(0.55rem);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -544,6 +527,31 @@ input:focus-visible {
     height: 5.2rem;
     border: 3px solid rgba(35, 149, 127, 0.24);
     border-radius: 1.5rem;
+}
+
+.profile-image-field {
+    margin-bottom: 0.5rem;
+}
+
+.profile-image-editor {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.profile-image-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.profile-image-actions small {
+    color: var(--muted);
+    font-size: 0.78rem;
 }
 
 .chip-row {
@@ -868,7 +876,7 @@ input:focus-visible {
     text-transform: uppercase;
 }
 
-.queue-table tbody tr + tr {
+.queue-table tbody tr+tr {
     border-top: 1px solid var(--border);
 }
 

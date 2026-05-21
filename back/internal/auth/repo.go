@@ -49,8 +49,8 @@ func (r *Repository) CreatePatient(accountID int64, insuranceNumber string) erro
 
 func (r *Repository) CreateDoctor(accountID int64, speciality_id int32, address string) error {
 	query := `
-		INSERT INTO doctors (account_id, speciality_id, address)
-		VALUES (?, ?, ?)
+		INSERT INTO doctors (account_id, speciality_id, address, availability)
+		VALUES (?, ?, ?, 'Available')
 	`
 
 	_, err := r.db.Exec(query, accountID, speciality_id, address)

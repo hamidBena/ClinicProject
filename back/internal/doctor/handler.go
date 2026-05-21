@@ -57,3 +57,9 @@ func (h *Handler) Profile(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}
 }
+
+func (h *Handler) SetAvailability(w http.ResponseWriter, r *http.Request) {
+    // only PATCH, only admin or doctor role
+    // body: { "availability": "Available" | "Unavailable" }
+    // calls service which calls repo UPDATE
+}

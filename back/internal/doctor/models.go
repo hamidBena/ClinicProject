@@ -4,9 +4,10 @@ import "clinic/internal/user"
 
 // Doctor represents a doctor's profile
 type Doctor struct {
-	user.User
-	Address      string `json:"address"`
-	SpecialityID int64  `json:"speciality_id"`
+    user.User
+    Address      string `json:"address"`
+    SpecialityID int64  `json:"speciality_id"`
+    Availability string `json:"availability"`
 }
 
 // ProfileUpdateRequest represents fields that can be updated in doctor profile

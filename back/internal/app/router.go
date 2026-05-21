@@ -81,10 +81,10 @@ func NewRouter(db *sql.DB) *http.ServeMux {
 	router.HandleFunc("/auth/logout", authHandler.Logout)
 	router.HandleFunc("/auth/forgot-password", authHandler.ForgotPassword)
 	router.HandleFunc("/auth/change-password", auth.AuthMiddleware(sessionStore, authHandler.ChangePassword))
-
 	router.HandleFunc("/patients/me", auth.AuthMiddleware(sessionStore, patientHandler.Profile))
 	router.HandleFunc("/doctors/me", auth.AuthMiddleware(sessionStore, doctorHandler.Profile))
-	router.HandleFunc("/queues", auth.AuthMiddleware(sessionStore, queueHandler.Queues))
+	router.HandleFunc("/doctors/availability", auth.AuthMiddleware(sessionStore, doctorHandler.SetAvailability))
+	router.HandleFunc("/queues", queueHandler.Queues)
 	router.HandleFunc("/reservations", auth.AuthMiddleware(sessionStore, reservationsHandler.Reservations))
 	router.HandleFunc("/reservations/queue/", auth.AuthMiddleware(sessionStore, reservationsHandler.ListByQueueID))
 	router.HandleFunc("/specialities", specialitiesHandler.ListAll)

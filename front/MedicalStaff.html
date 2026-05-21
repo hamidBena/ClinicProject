@@ -8,8 +8,6 @@
     <link rel="stylesheet" href="styles/style(MedicalStaff).css">
 </head>
 <body>
-    <a class="skip-link" href="#mainContent">Skip to main content</a>
-
     <div class="dashboard-shell">
         <aside class="sidebar" aria-label="Main sidebar">
             <div class="brand-block">
@@ -143,7 +141,7 @@
             </section>
 
             <!-- PROFILE VIEW -->
-            <section id="profile" class="view" aria-labelledby="profileTitle" hidden>
+            <section id="profile" class="view" aria-labelledby="profileTitle">
                 <header class="page-header">
                     <div>
                         <p class="eyebrow">Account</p>
@@ -227,7 +225,7 @@
             </section>
 
             <!-- RESERVATIONS VIEW -->
-            <section id="reservations" class="view" aria-labelledby="reservationsTitle" hidden>
+            <section id="reservations" class="view" aria-labelledby="reservationsTitle">
                 <header class="page-header">
                     <div>
                         <p class="eyebrow">Patient appointments</p>
@@ -255,11 +253,11 @@
                 </div>
 
                 <div class="reservation-grid" id="reservationGrid"></div>
-                <p class="empty-state" id="reservationEmpty" hidden>No reservations found.</p>
+                <p class="empty-state" id="reservationEmpty">No reservations found.</p>
             </section>
 
             <!-- QUEUE VIEW -->
-            <section id="queue" class="view" aria-labelledby="queueTitle" hidden>
+            <section id="queue" class="view" aria-labelledby="queueTitle">
                 <header class="page-header">
                     <div>
                         <p class="eyebrow">Live queue</p>
@@ -287,7 +285,7 @@
                             </div>
                         </header>
 
-                        <div class="next-patient-bar" id="nextPatientBar" hidden>
+                        <div class="next-patient-bar" id="nextPatientBar">
                             <div>
                                 <span class="eyebrow">Currently serving</span>
                                 <strong id="currentPatientName">—</strong>
@@ -302,6 +300,7 @@
                                         <th scope="col">Position</th>
                                         <th scope="col">Patient</th>
                                         <th scope="col">Time</th>
+                                        <th scope="col">Est. duration</th>
                                         <th scope="col">Status</th>
                                         <th scope="col">Action</th>
                                     </tr>
@@ -309,13 +308,13 @@
                                 <tbody id="queueTableBody"></tbody>
                             </table>
                         </div>
-                        <p class="empty-state" id="queueEmpty" hidden>No patients in this queue.</p>
+                        <p class="empty-state" id="queueEmpty">No patients in this queue.</p>
                     </article>
                 </div>
             </section>
 
             <!-- DOCTOR LIST VIEW -->
-            <section id="doctors" class="view" aria-labelledby="doctorsTitle" hidden>
+            <section id="doctors" class="view" aria-labelledby="doctorsTitle">
                 <header class="page-header">
                     <div>
                         <p class="eyebrow">Medical team</p>
@@ -342,17 +341,17 @@
                 </div>
 
                 <div class="doctor-grid" id="doctorGrid"></div>
-                <p class="empty-state" id="doctorEmpty" hidden>No doctors found.</p>
+                <p class="empty-state" id="doctorEmpty">No doctors found.</p>
             </section>
 
         </main>
     </div>
 
     <!-- OVERLAY -->
-    <div class="overlay" id="modalOverlay" hidden></div>
+    <div class="overlay" id="modalOverlay"></div>
 
     <!-- ADD RESERVATION MODAL -->
-    <div class="modal" id="addReservationModal" role="dialog" aria-modal="true" aria-labelledby="addResTitle" hidden>
+    <div class="modal" id="addReservationModal" role="dialog" aria-modal="true" aria-labelledby="addResTitle">
         <div class="modal-header">
             <div>
                 <p class="eyebrow">New appointment</p>
@@ -398,7 +397,7 @@
     </div>
 
     <!-- UPDATE DOCTOR STATUS MODAL -->
-    <div class="modal" id="updateDoctorModal" role="dialog" aria-modal="true" aria-labelledby="updateDocTitle" hidden>
+    <div class="modal" id="updateDoctorModal" role="dialog" aria-modal="true" aria-labelledby="updateDocTitle">
         <div class="modal-header">
             <div>
                 <p class="eyebrow">Doctor management</p>
@@ -433,7 +432,7 @@
     </div>
 
     <!-- CONFIRM DIALOG -->
-    <section class="confirm-dialog" id="cancelDialog" role="dialog" aria-modal="true" aria-labelledby="cancelDialogTitle" hidden>
+    <section class="confirm-dialog" id="cancelDialog" role="dialog" aria-modal="true" aria-labelledby="cancelDialogTitle">
         <div>
             <p class="eyebrow">Confirm action</p>
             <h2 id="cancelDialogTitle">Cancel reservation</h2>
@@ -445,6 +444,6 @@
         </div>
     </section>
 
-    <script src="js/medcal-staff.js"></script>
+    <script src="js/medical-staff.js"></script>
 </body>
 </html>

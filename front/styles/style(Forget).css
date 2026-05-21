@@ -52,24 +52,6 @@ a {
     color: inherit;
 }
 
-.skip_link {
-    position: fixed;
-    top: 1rem;
-    left: 1rem;
-    z-index: 10;
-    padding: 0.7rem 1rem;
-    border-radius: var(--radius-sm);
-    background: var(--color-surface);
-    color: var(--color-navy);
-    box-shadow: var(--shadow-card);
-    transform: translateY(-150%);
-    transition: transform 0.2s ease;
-}
-
-.skip_link:focus {
-    transform: translateY(0);
-}
-
 .welcome_shell {
     width: min(1180px, calc(100% - 2rem));
     min-height: 100dvh;

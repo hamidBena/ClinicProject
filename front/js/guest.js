@@ -82,15 +82,45 @@ async function checkSession() {
 
 async function loadPublicQueues() {
     try {
-        const response = await fetch(`${API_URL}/queues/public`, {
+        const queuesRes = await fetch(`${API_URL}/queues`, {
             credentials: "include"
         });
+        if (!queuesRes.ok) return fallbackQueues;
+        const queues = await queuesRes.json();
 
-        if (!response.ok) return fallbackQueues;
+        // For each queue, fetch its reservations
+        const enriched = await Promise.all(queues.map(async (q) => {
+            let entries = [];
+            try {
+                const resRes = await fetch(`${API_URL}/reservations/queue/${q.id}`, {
+                    credentials: "include"
+                });
+                if (resRes.ok) {
+                    const reservations = await resRes.json();
+                    entries = reservations.map((r, i) => ({
+                        position: i + 1,
+                        time: new Date(r.timedue).toLocaleTimeString("en-US", {
+                            hour: "2-digit", minute: "2-digit", hour12: false
+                        }),
+                        status: r.status === "Waiting" ? "waiting"
+                            : r.status === "Proccessing" ? "in-progress"
+                                : "finished"
+                    }));
+                }
+            } catch (_) { }
 
-        const data = await response.json();
-        return normalizePublicQueue(data);
-    } catch (error) {
+            return {
+                id: String(q.id),
+                doctor: q.speciality_name || "Doctor",
+                speciality: q.speciality_name || "General",
+                room: "Room —",
+                image: `images/${q.speciality_name || "logo"}.png`,
+                entries
+            };
+        }));
+
+        return enriched.length ? enriched : fallbackQueues;
+    } catch (_) {
         return fallbackQueues;
     }
 }

@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Patient dashboard for booking appointments, managing reservations, tracking queues, and reading healthcare notifications.">
+    <meta name="description"
+        content="Patient dashboard for booking appointments, managing reservations, tracking queues, and reading healthcare notifications.">
     <title>Healthcare Management System</title>
     <link rel="stylesheet" href="styles/style(Home).css">
 </head>
-<body>
-    <a class="skip-link" href="#mainContent">Skip to main content</a>
 
+<body>
     <div class="dashboard-shell">
         <aside class="sidebar" aria-label="Main sidebar">
             <div class="brand-block">
@@ -29,7 +30,8 @@
             </div>
 
             <nav class="sidebar-nav" aria-label="Dashboard navigation">
-                <button type="button" class="nav-link is-active" data-page-target="home" aria-controls="home" aria-current="page">
+                <button type="button" class="nav-link is-active" data-page-target="home" aria-controls="home"
+                    aria-current="page">
                     <span aria-hidden="true">⌂</span>
                     Home
                 </button>
@@ -59,7 +61,7 @@
                 <header class="page-header hero-header">
                     <div>
                         <p class="eyebrow">Welcome back</p>
-                        <h2 id="homeTitle">Welcome, <span id="username">mouad</span></h2>
+                        <h2 id="homeTitle">Welcome, <span id="username">User</span></h2>
                         <p>Book an appointment with a specialist and track your care from one place.</p>
                     </div>
 
@@ -76,7 +78,8 @@
                     <label id="specialitySearchLabel" for="specialitySearch">Search specialities</label>
                     <div class="search-field">
                         <span aria-hidden="true">⌕</span>
-                        <input id="specialitySearch" type="search" placeholder="Search cardiology, neurology, dentistry...">
+                        <input id="specialitySearch" type="search"
+                            placeholder="Search cardiology, neurology, dentistry...">
                     </div>
                     <p id="specialityEmpty" class="empty-inline" hidden>No matching specialities found.</p>
                 </section>
@@ -88,14 +91,16 @@
                     </div>
 
                     <div class="speciality-grid" id="specialityGrid">
-                        <button type="button" class="speciality-card" data-specialty="cardiology heart blood vessel care">
+                        <button type="button" class="speciality-card"
+                            data-specialty="cardiology heart blood vessel care">
                             <img src="images/Cardiology.png" alt="Cardiology speciality icon">
                             <span class="speciality-name">Cardiology</span>
                             <span class="speciality-description">Heart and blood vessel care</span>
                             <span class="availability-pill">8 doctors available</span>
                         </button>
 
-                        <button type="button" class="speciality-card" data-specialty="neurology brain nervous system care">
+                        <button type="button" class="speciality-card"
+                            data-specialty="neurology brain nervous system care">
                             <img src="images/Neurology.png" alt="Neurology speciality icon">
                             <span class="speciality-name">Neurology</span>
                             <span class="speciality-description">Brain and nervous system care</span>
@@ -109,35 +114,40 @@
                             <span class="availability-pill">5 doctors available</span>
                         </button>
 
-                        <button type="button" class="speciality-card" data-specialty="psychiatry mental health wellbeing">
+                        <button type="button" class="speciality-card"
+                            data-specialty="psychiatry mental health wellbeing">
                             <img src="images/Psychiatry.png" alt="Psychiatry speciality icon">
                             <span class="speciality-name">Psychiatry</span>
                             <span class="speciality-description">Mental health and wellbeing</span>
                             <span class="availability-pill">4 doctors available</span>
                         </button>
 
-                        <button type="button" class="speciality-card" data-specialty="orthopedics bone joint muscle care">
+                        <button type="button" class="speciality-card"
+                            data-specialty="orthopedics bone joint muscle care">
                             <img src="images/Orthopedics.png" alt="Orthopedics speciality icon">
                             <span class="speciality-name">Orthopedics</span>
                             <span class="speciality-description">Bone, joint and muscle care</span>
                             <span class="availability-pill">7 doctors available</span>
                         </button>
 
-                        <button type="button" class="speciality-card" data-specialty="dentistry dental oral health care">
+                        <button type="button" class="speciality-card"
+                            data-specialty="dentistry dental oral health care">
                             <img src="images/Dentistry.png" alt="Dentistry speciality icon">
                             <span class="speciality-name">Dentistry</span>
                             <span class="speciality-description">Dental and oral health care</span>
                             <span class="availability-pill">9 doctors available</span>
                         </button>
 
-                        <button type="button" class="speciality-card" data-specialty="gastroenterology digestive system care">
+                        <button type="button" class="speciality-card"
+                            data-specialty="gastroenterology digestive system care">
                             <img src="images/Gastro.png" alt="Gastroenterology speciality icon">
                             <span class="speciality-name">Gastroenterology</span>
                             <span class="speciality-description">Digestive system care</span>
                             <span class="availability-pill">3 doctors available</span>
                         </button>
 
-                        <button type="button" class="speciality-card" data-specialty="hematology blood disorders treatment">
+                        <button type="button" class="speciality-card"
+                            data-specialty="hematology blood disorders treatment">
                             <img src="images/Hematology.png" alt="Hematology speciality icon">
                             <span class="speciality-name">Hematology</span>
                             <span class="speciality-description">Blood disorders and treatment</span>
@@ -174,9 +184,9 @@
                 <div class="profile-layout">
                     <article class="panel profile-panel" aria-label="Profile information">
                         <div class="profile-topline">
-                            <img class="profile-photo" src="images/Cardiology.png" alt="Patient profile photo">
+                            <img id="profilePhoto" class="profile-photo" src="images/Cardiology.png" alt="Patient profile photo">
                             <div>
-                                <h3 id="profileName">Messallem Ouail</h3>
+                                <h3 id="profileName">User</h3>
                                 <div class="chip-row">
                                     <span class="chip chip-success">Active</span>
                                     <span class="chip">Patient</span>
@@ -198,6 +208,10 @@
                                 <dd id="displayAddress">123 Main Street, City, Country</dd>
                             </div>
                             <div>
+                                <dt>Insurance</dt>
+                                <dd id="displayInsurance">ABC Insurance</dd>
+                            </div>
+                            <div>
                                 <dt>Birthday</dt>
                                 <dd id="displayBirthday">January 1, 1990</dd>
                             </div>
@@ -208,6 +222,10 @@
                             <div>
                                 <dt>Chronic diseases</dt>
                                 <dd><span class="chip chip-warning">Asthma</span></dd>
+                            </div>
+                            <div>
+                                <dt>Medical File</dt>
+                                <dd><span class="chip chip-warning">Not Found</span></dd>
                             </div>
                         </dl>
 
@@ -221,9 +239,23 @@
                         </header>
 
                         <div class="form-grid">
+
+                            <div class="field-group field-wide profile-image-field">
+                                <label>Profile picture</label>
+                                <div class="profile-image-editor">
+                                    <img src="" alt="Profile preview" id="profilePhotoPreview" class="profile-photo">
+                                    <div class="profile-image-actions">
+                                        <label for="profilePhotoInput" class="button button-secondary">Choose photo</label>
+                                        <input type="file" id="profilePhotoInput" accept="image/*" hidden>
+                                        <small>JPG, PNG or WEBP</small>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="field-group">
                                 <label for="emailInput">Email</label>
-                                <input type="email" id="emailInput" name="email" value="messallem.ouail@example.com" required>
+                                <input type="email" id="emailInput" name="email" value="messallem.ouail@example.com"
+                                    required>
                                 <small class="field-error" data-error-for="emailInput"></small>
                             </div>
 
@@ -237,6 +269,12 @@
                                 <label for="addressInput">Address</label>
                                 <input type="text" id="addressInput" name="address" value="123 Main Street, City, Country" required>
                                 <small class="field-error" data-error-for="addressInput"></small>
+                            </div>
+
+                            <div class="field-group field-wide">
+                                <label for="InsuranceInput">Insurance</label>
+                                <input type="text" id="InsuranceInput" name="insurance" value="ABC Insurance" required>
+                                <small class="field-error" data-error-for="InsuranceInput"></small>
                             </div>
 
                             <div class="field-group">
@@ -266,7 +304,8 @@
                 </header>
 
                 <div class="reservation-grid" id="reservationList">
-                    <p class="empty-state" id="reservationEmpty" hidden>No active reservations. Book a specialist from the home page.</p>
+                    <p class="empty-state" id="reservationEmpty" hidden>No active reservations. Book a specialist from
+                        the home page.</p>
 
                     <article class="reservation-card" data-doctor="Dr. Belfatmi Ilyes">
                         <header>
@@ -291,7 +330,8 @@
                             </div>
                         </dl>
 
-                        <button type="button" class="button button-danger cancel-reservation-btn">Cancel reservation</button>
+                        <button type="button" class="button button-danger cancel-reservation-btn">Cancel
+                            reservation</button>
                     </article>
 
                     <article class="reservation-card" data-doctor="Dr. Hireche Anes">
@@ -317,7 +357,8 @@
                             </div>
                         </dl>
 
-                        <button type="button" class="button button-danger cancel-reservation-btn">Cancel reservation</button>
+                        <button type="button" class="button button-danger cancel-reservation-btn">Cancel
+                            reservation</button>
                     </article>
                 </div>
             </section>
@@ -397,7 +438,8 @@
                             <h3>Appointment reminder</h3>
                             <time datetime="PT10M">10 min</time>
                         </header>
-                        <p>Your cardiology appointment begins soon. Please arrive at the waiting area and keep your queue number visible.</p>
+                        <p>Your cardiology appointment begins soon. Please arrive at the waiting area and keep your
+                            queue number visible.</p>
                     </article>
 
                     <article class="notification-card">
@@ -414,7 +456,8 @@
 
     <div class="overlay" id="modalOverlay" hidden></div>
 
-    <section class="confirm-dialog" id="cancelDialog" role="dialog" aria-modal="true" aria-labelledby="cancelDialogTitle" hidden>
+    <section class="confirm-dialog" id="cancelDialog" role="dialog" aria-modal="true"
+        aria-labelledby="cancelDialogTitle" hidden>
         <div>
             <p class="eyebrow">Confirm action</p>
             <h2 id="cancelDialogTitle">Cancel reservation</h2>
@@ -426,6 +469,7 @@
         </div>
     </section>
 
-    <script src="js/app.js"></script>
+    <script src="js/home.js"></script>
 </body>
+
 </html>

@@ -1,41 +1,26 @@
 package queue
 
 import (
-	"clinic/internal/specialities"
 	"errors"
 )
 
 type Service struct {
-	repo                *Repository
-	specialitiesService *specialities.Service
+	repo *Repository
 }
 
-func NewService(repo *Repository, sp *specialities.Service) *Service {
-	return &Service{repo: repo, specialitiesService: sp}
+func NewService(repo *Repository, _ interface{}) *Service {
+	return &Service{repo: repo}
 }
 
 func (s *Service) GetByID(id int64) (*Queue, error) {
 	if id <= 0 {
 		return nil, errors.New("invalid queue id")
 	}
-
 	return s.repo.GetByID(id)
 }
 
 func (s *Service) ListAll() ([]Queue, error) {
-	queues, err := s.repo.ListAll()
-	if err != nil {
-		return nil, err
-	}
-
-	for i := range queues {
-		name, err := s.specialitiesService.GetNameByID(queues[i].SpecialityID)
-		if err == nil {
-			queues[i].SpecialityName = name
-		}
-	}
-
-	return queues, nil
+	return s.repo.ListAll()
 }
 
 func (s *Service) Create(req Queue) (*Queue, error) {
@@ -73,7 +58,6 @@ func (s *Service) Update(req QueueUpdateRequest) (*Queue, error) {
 	if req.ID <= 0 {
 		return nil, errors.New("invalid queue id")
 	}
-
 	if req.MaxSize != nil && *req.MaxSize <= 0 {
 		return nil, errors.New("max_size must be greater than zero")
 	}
