@@ -2,157 +2,183 @@ const API_URL = window.location.origin && window.location.origin !== "null"
     ? window.location.origin
     : "http://localhost:8080";
 
-const signUpForm = document.getElementById("signUpForm");
+// Wait for DOM before touching anything
+document.addEventListener("DOMContentLoaded", () => {
 
-const usernameInput = document.getElementById("username");
-const firstNameInput = document.getElementById("first_name");
-const lastNameInput = document.getElementById("last_name");
-const emailInput = document.getElementById("email");
-const phoneNumberInput = document.getElementById("phone_number");
-const insuranceNumberInput = document.getElementById("insurance_number");
-const addressInput = document.getElementById("address");
-const passwordInput = document.getElementById("password");
-const confirmPasswordInput = document.getElementById("confirm_password");
+    const signUpForm = document.getElementById("signUpForm");
+    const usernameInput = document.getElementById("username");
+    const firstNameInput = document.getElementById("first_name");
+    const lastNameInput = document.getElementById("last_name");
+    const emailInput = document.getElementById("email");
+    const phoneNumberInput = document.getElementById("phone_number");
+    const insuranceNumberInput = document.getElementById("insurance_number");
+    const passwordInput = document.getElementById("password");
+    const confirmPasswordInput = document.getElementById("confirm_password");
+    const errorMsg = document.getElementById("errorMsg");
+    const successMsg = document.getElementById("successMsg");
+    const signupBtn = document.getElementById("signupBtn");
+    const fileInput = document.getElementById("profile_photo");
+    const fileName = document.getElementById("fileName");
+    const pfpPreview = document.getElementById("pfpPreview");
 
-const errorMsg = document.getElementById("errorMsg");
-const successMsg = document.getElementById("successMsg");
-const signupBtn = document.getElementById("signupBtn");
+    pfpPreview.src = "images/Cardiology.png";
+    fileName.textContent = "No file selected";
 
-function showMessage(element, message) {
-    element.textContent = message;
-    element.classList.add("is_visible");
-}
+    fileInput.addEventListener("change", () => {
+        const file = fileInput.files[0];
 
-function clearMessages() {
-    errorMsg.textContent = "";
-    successMsg.textContent = "";
-    errorMsg.classList.remove("is_visible");
-    successMsg.classList.remove("is_visible");
-}
-
-function setLoading(isLoading, label = "Create account") {
-    signupBtn.disabled = isLoading;
-    signupBtn.textContent = isLoading ? label : "Create account";
-}
-
-function setFieldGroupState(fields, isActive) {
-    fields.forEach((field) => {
-        field.classList.toggle("is_hidden", !isActive);
-
-        field.querySelectorAll("input, select").forEach((input) => {
-            input.disabled = !isActive;
-            input.required = isActive;
-        });
-    });
-}
-
-function readJsonOrText(response) {
-    return response.text().then((text) => {
-        let data = null;
-
-        try {
-            data = text ? JSON.parse(text) : null;
-        } catch (error) {
-            data = null;
+        if (!file) {
+            fileName.textContent = "No file selected";
+            pfpPreview.src = "images/Cardiology.png";
+            return;
         }
 
-        return { text, data };
+        fileName.textContent = file.name;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            pfpPreview.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
     });
-}
 
-async function checkSession() {
-    try {
-        const response = await fetch(`${API_URL}/auth/me`, {
-            credentials: "include"
-        });
-
-        if (response.ok) {
-            window.location.href = "Home.html";
-        }
-    } catch (error) {
-        // Stay on the signup page when the API is unavailable.
-    }
-}
-
-async function handleSignup(event) {
-    event.preventDefault();
-    clearMessages();
-
-    if (!signUpForm.checkValidity()) {
-        signUpForm.reportValidity();
-        return;
-    }
-
-    if (passwordInput.value !== confirmPasswordInput.value) {
-        showMessage(errorMsg, "Passwords do not match.");
-        confirmPasswordInput.focus();
-        return;
-    }
-
-
-    const payload = {
-        username: usernameInput.value.trim(),
-        first_name: firstNameInput.value.trim(),
-        last_name: lastNameInput.value.trim(),
-        phone_number: phoneNumberInput.value.trim(),
-        email: emailInput.value.trim(),
-        insurance_number = insuranceNumberInput.value.trim(),
-        password: passwordInput.value,
+    // Guard — if any critical element is missing, log and stop
+    const critical = {
+        signUpForm, usernameInput, firstNameInput, lastNameInput,
+        emailInput, phoneNumberInput, passwordInput, confirmPasswordInput,
+        errorMsg, successMsg, signupBtn
     };
 
-    let redirecting = false;
-    setLoading(true, "Creating account...");
-
-    try {
-        const response = await fetch(`${API_URL}/auth/register`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            credentials: "include",
-            body: JSON.stringify(payload)
-        });
-
-        const registerResult = await readJsonOrText(response);
-
-        if (!response.ok) {
-            throw new Error(
-                (registerResult.data && registerResult.data.message) ||
-                registerResult.text ||
-                "Signup failed. Please check your information."
-            );
-        }
-
-        setLoading(true, "Signing in...");
-
-        const loginResponse = await fetch(`${API_URL}/auth/login`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            credentials: "include",
-            body: JSON.stringify({
-                email: payload.email,
-                password: payload.password
-            })
-        });
-
-        if (!loginResponse.ok) {
-            throw new Error("Account created, but automatic login failed. Please log in manually.");
-        }
-
-        redirecting = true;
-        showMessage(successMsg, "Account created. Redirecting to your dashboard...");
-        setLoading(true, "Redirecting...");
-
-        window.setTimeout(() => {
-            window.location.href = "Home.html";
-        }, 900);
-    } catch (error) {
-        showMessage(errorMsg, error.message || "Signup failed. Please try again.");
-    } finally {
-        if (!redirecting) {
-            setLoading(false);
+    for (const [name, el] of Object.entries(critical)) {
+        if (!el) {
+            console.error(`signup.js: missing element #${name}`);
+            return;
         }
     }
-}
+
+    // ── Helpers ───────────────────────────────────────────────
+    function showError(message) {
+        errorMsg.textContent = message;
+        errorMsg.classList.add("is_visible");
+        successMsg.classList.remove("is_visible");
+    }
+
+    function showSuccess(message) {
+        successMsg.textContent = message;
+        successMsg.classList.add("is_visible");
+        errorMsg.classList.remove("is_visible");
+    }
+
+    function clearMessages() {
+        errorMsg.textContent = "";
+        successMsg.textContent = "";
+        errorMsg.classList.remove("is_visible");
+        successMsg.classList.remove("is_visible");
+    }
+
+    function setLoading(isLoading, label = "Create account") {
+        signupBtn.disabled = isLoading;
+        signupBtn.textContent = isLoading ? label : "Create account";
+    }
+
+    function val(input) {
+        return input ? input.value.trim() : "";
+    }
+
+    // ── Validation (manual — no browser pop-ups) ──────────────
+    function validate() {
+        if (!val(usernameInput)) { showError("Username is required."); return false; }
+        if (val(usernameInput).length < 5) { showError("Username must be at least 5 characters."); return false; }
+        if (!val(firstNameInput)) { showError("First name is required."); return false; }
+        if (!val(lastNameInput)) { showError("Last name is required."); return false; }
+        if (!val(emailInput)) { showError("Email address is required."); return false; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val(emailInput))) {
+            showError("Enter a valid email address."); return false;
+        }
+        if (!val(phoneNumberInput)) { showError("Phone number is required."); return false; }
+        if (!val(passwordInput)) { showError("Password is required."); return false; }
+        if (val(passwordInput).length < 6) { showError("Password must be at least 6 characters."); return false; }
+        if (val(passwordInput).includes(" ")) { showError("Password cannot contain spaces."); return false; }
+        if (passwordInput.value !== confirmPasswordInput.value) {
+            showError("Passwords do not match."); return false;
+        }
+        return true;
+    }
+
+    // ── Session check ─────────────────────────────────────────
+    async function checkSession() {
+        try {
+            const res = await fetch(`${API_URL}/auth/me`, { credentials: "include" });
+            if (res.ok) window.location.href = "Home.html";
+        } catch {
+            // offline — stay on page
+        }
+    }
+
+    // ── Submit ────────────────────────────────────────────────
+    async function handleSignup(e) {
+        e.preventDefault();
+        clearMessages();
+
+        if (!validate()) return;
+
+        const payload = {
+            username: val(usernameInput),
+            first_name: val(firstNameInput),
+            last_name: val(lastNameInput),
+            email: val(emailInput),
+            phone_number: val(phoneNumberInput),
+            insurance_number: val(insuranceNumberInput),
+            password: passwordInput.value,
+            role: "patient",
+        };
+
+        let redirecting = false;
+        setLoading(true, "Creating account...");
+
+        try {
+            const res = await fetch(`${API_URL}/auth/register`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify(payload),
+            });
+
+            const text = await res.text();
+            let data = null;
+            try { data = text ? JSON.parse(text) : null; } catch { data = null; }
+
+            if (!res.ok) {
+                throw new Error(
+                    (data && data.message) || text || "Signup failed. Please check your information."
+                );
+            }
+
+            setLoading(true, "Signing in...");
+
+            const loginRes = await fetch(`${API_URL}/auth/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ email: payload.email, password: payload.password }),
+            });
+
+            if (!loginRes.ok) {
+                throw new Error("Account created but auto-login failed. Please log in manually.");
+            }
+
+            redirecting = true;
+            showSuccess("Account created! Redirecting...");
+            setLoading(true, "Redirecting...");
+            setTimeout(() => { window.location.href = "Home.html"; }, 900);
+
+        } catch (err) {
+            showError(err.message || "Signup failed. Please try again.");
+        } finally {
+            if (!redirecting) setLoading(false);
+        }
+    }
+
+    signUpForm.addEventListener("submit", handleSignup);
+    checkSession();
+});

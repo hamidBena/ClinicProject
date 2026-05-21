@@ -20,17 +20,20 @@ func NewRepository(db *sql.DB, userRepo *user.Repository) *Repository {
 }
 
 func (r *Repository) GetPatientByAccountID(accountID int) (*Patient, error) {
-	user, err := r.userRepo.GetUserByAccountID(accountID)
+	u, err := r.userRepo.GetUserByAccountID(accountID)
 	if err != nil {
 		return nil, err
 	}
 
-	var insuranceNumber string
+	var insuranceNumber sql.NullString
+	var address sql.NullString
+	var birthday sql.NullString
+
 	err = r.db.QueryRow(`
-		SELECT insurance_number
-		FROM patients
-		WHERE account_id = ?
-	`, accountID).Scan(&insuranceNumber)
+        SELECT insurance_number, "address ", "birthday "
+        FROM patients
+        WHERE account_id = ?
+    `, accountID).Scan(&insuranceNumber, &address, &birthday)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.New("patient not found")
@@ -39,8 +42,10 @@ func (r *Repository) GetPatientByAccountID(accountID int) (*Patient, error) {
 	}
 
 	return &Patient{
-		User:            *user,
-		InsuranceNumber: insuranceNumber,
+		User:            *u,
+		InsuranceNumber: insuranceNumber.String,
+		Address:         address.String,
+		Birthday:        birthday.String,
 	}, nil
 }
 
@@ -50,16 +55,12 @@ func (r *Repository) UpdatePatientProfile(accountID int, update ProfileUpdateReq
 		return err
 	}
 
-	if update.InsuranceNumber != "" {
-		_, err = r.db.Exec(`
-			UPDATE patients
-			SET insurance_number = ?
-			WHERE account_id = ?
-		`, update.InsuranceNumber, accountID)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	_, err = r.db.Exec(`
+        UPDATE patients
+        SET insurance_number = ?,
+            "address "       = ?,
+            "birthday "      = ?
+        WHERE account_id = ?
+    `, update.InsuranceNumber, update.Address, update.Birthday, accountID)
+	return err
 }

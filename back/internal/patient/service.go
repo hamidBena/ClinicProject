@@ -48,6 +48,12 @@ func (s *Service) UpdateProfile(accountID int, req ProfileUpdateRequest) (*Patie
 	if req.InsuranceNumber == "" {
 		req.InsuranceNumber = current.InsuranceNumber
 	}
+	if req.Address == "" {
+		req.Address = current.Address
+	}
+	if req.Birthday == "" {
+		req.Birthday = current.Birthday
+	}
 
 	err = s.repo.UpdatePatientProfile(accountID, req)
 	if err != nil {

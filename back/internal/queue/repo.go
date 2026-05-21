@@ -20,12 +20,11 @@ func (r *Repository) Create(queue *Queue) error {
 	}
 
 	result, err := r.db.Exec(
-		`INSERT INTO queues (queue_maxSize, queue_size, queue_index, queue_state, speciality_id)
-		 VALUES (?, ?, ?, ?, ?)`,
+		`INSERT INTO queues (queue_maxSize, queue_size, queue_index, speciality_id)
+		VALUES (?, ?, ?, ?)`,
 		queue.MaxSize,
 		queue.QueueCurrentSize,
 		queue.QueueIndex,
-		queue.QueueState,
 		queue.SpecialityID,
 	)
 	if err != nil {
@@ -55,10 +54,6 @@ func (r *Repository) Update(queueID int64, req QueueUpdateRequest) error {
 	if req.QueueIndex != nil {
 		assignments = append(assignments, "queue_index = ?")
 		args = append(args, *req.QueueIndex)
-	}
-	if req.QueueState != nil {
-		assignments = append(assignments, "queue_state = ?")
-		args = append(args, *req.QueueState)
 	}
 	if req.SpecialityID != nil {
 		assignments = append(assignments, "speciality_id = ?")
@@ -93,9 +88,8 @@ func (r *Repository) GetByID(id int64) (*Queue, error) {
 	}
 
 	var queue Queue
-	var queueState sql.NullString
 	err := r.db.QueryRow(
-		`SELECT id_queue, queue_maxSize, queue_size, queue_index, queue_state, speciality_id
+		`SELECT id_queue, queue_maxSize, queue_size, queue_index, speciality_id
 		 FROM queues
 		 WHERE id_queue = ?`,
 		id,
@@ -104,7 +98,6 @@ func (r *Repository) GetByID(id int64) (*Queue, error) {
 		&queue.MaxSize,
 		&queue.QueueCurrentSize,
 		&queue.QueueIndex,
-		&queueState,
 		&queue.SpecialityID,
 	)
 	if err != nil {
@@ -114,18 +107,19 @@ func (r *Repository) GetByID(id int64) (*Queue, error) {
 		return nil, err
 	}
 
-	if queueState.Valid {
-		queue.QueueState = queueState.String
-	}
-
 	return &queue, nil
 }
 
 func (r *Repository) ListAll() ([]Queue, error) {
 	rows, err := r.db.Query(
-		`SELECT id_queue, queue_maxSize, queue_size, queue_index, queue_state, speciality_id
-		 FROM queues
-		 ORDER BY id_queue ASC`,
+		`SELECT q.id_queue, q.queue_maxSize, q.queue_size, q.queue_index, q.speciality_id,
+		        COALESCE(s.name, ''),
+		        COALESCE(a.first_name || ' ' || a.last_name, '')
+		 FROM queues q
+		 LEFT JOIN specialities s ON s.id_speciality = q.speciality_id
+		 LEFT JOIN doctors d ON d.speciality_id = q.speciality_id
+		 LEFT JOIN accounts a ON a.id_account = d.account_id
+		 ORDER BY q.id_queue ASC`,
 	)
 	if err != nil {
 		return nil, err
@@ -134,28 +128,23 @@ func (r *Repository) ListAll() ([]Queue, error) {
 
 	queues := make([]Queue, 0)
 	for rows.Next() {
-		var queue Queue
-		var queueState sql.NullString
+		var q Queue
+		var specialityName, doctorName string
 		if err := rows.Scan(
-			&queue.ID,
-			&queue.MaxSize,
-			&queue.QueueCurrentSize,
-			&queue.QueueIndex,
-			&queueState,
-			&queue.SpecialityID,
+			&q.ID,
+			&q.MaxSize,
+			&q.QueueCurrentSize,
+			&q.QueueIndex,
+			&q.SpecialityID,
+			&specialityName,
+			&doctorName,
 		); err != nil {
 			return nil, err
 		}
-
-		if queueState.Valid {
-			queue.QueueState = queueState.String
-		}
-		queues = append(queues, queue)
+		q.SpecialityName = specialityName
+		q.DoctorName = strings.TrimSpace(doctorName)
+		queues = append(queues, q)
 	}
 
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return queues, nil
+	return queues, rows.Err()
 }

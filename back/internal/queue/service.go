@@ -1,12 +1,14 @@
 package queue
 
-import "errors"
+import (
+	"errors"
+)
 
 type Service struct {
 	repo *Repository
 }
 
-func NewService(repo *Repository) *Service {
+func NewService(repo *Repository, _ interface{}) *Service {
 	return &Service{repo: repo}
 }
 
@@ -14,7 +16,6 @@ func (s *Service) GetByID(id int64) (*Queue, error) {
 	if id <= 0 {
 		return nil, errors.New("invalid queue id")
 	}
-
 	return s.repo.GetByID(id)
 }
 
@@ -32,9 +33,6 @@ func (s *Service) Create(req Queue) (*Queue, error) {
 	if req.QueueIndex < 0 {
 		return nil, errors.New("queue_index cannot be negative")
 	}
-	if req.QueueState == "" {
-		return nil, errors.New("queue_state is required")
-	}
 	if req.SpecialityID <= 0 {
 		return nil, errors.New("speciality_id is required")
 	}
@@ -46,7 +44,6 @@ func (s *Service) Create(req Queue) (*Queue, error) {
 		MaxSize:          req.MaxSize,
 		QueueCurrentSize: req.QueueCurrentSize,
 		QueueIndex:       req.QueueIndex,
-		QueueState:       req.QueueState,
 		SpecialityID:     req.SpecialityID,
 	}
 
@@ -61,7 +58,6 @@ func (s *Service) Update(req QueueUpdateRequest) (*Queue, error) {
 	if req.ID <= 0 {
 		return nil, errors.New("invalid queue id")
 	}
-
 	if req.MaxSize != nil && *req.MaxSize <= 0 {
 		return nil, errors.New("max_size must be greater than zero")
 	}
@@ -70,9 +66,6 @@ func (s *Service) Update(req QueueUpdateRequest) (*Queue, error) {
 	}
 	if req.QueueIndex != nil && *req.QueueIndex < 0 {
 		return nil, errors.New("queue_index cannot be negative")
-	}
-	if req.QueueState != nil && *req.QueueState == "" {
-		return nil, errors.New("queue_state is required")
 	}
 	if req.SpecialityID != nil && *req.SpecialityID <= 0 {
 		return nil, errors.New("speciality_id is required")
@@ -91,9 +84,6 @@ func (s *Service) Update(req QueueUpdateRequest) (*Queue, error) {
 	}
 	if req.QueueIndex != nil {
 		current.QueueIndex = *req.QueueIndex
-	}
-	if req.QueueState != nil {
-		current.QueueState = *req.QueueState
 	}
 	if req.SpecialityID != nil {
 		current.SpecialityID = *req.SpecialityID

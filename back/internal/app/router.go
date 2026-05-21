@@ -6,6 +6,7 @@ import (
 	"clinic/internal/doctor"
 	"clinic/internal/patient"
 	"clinic/internal/queue"
+	"clinic/internal/specialities"
 	"clinic/internal/user"
 	"database/sql"
 	"errors"
@@ -31,13 +32,17 @@ func Endpoints() []Endpoint {
 		{Method: "POST", Path: "/auth/logout"},
 		{Method: "POST", Path: "/auth/forgot-password"},
 		{Method: "POST", Path: "/auth/change-password"},
-		{Method: "GET", Path: "/auth/ping"},
+
 		{Method: "GET|PATCH", Path: "/patients/me"},
 		{Method: "GET|PATCH", Path: "/doctors/me"},
+
 		{Method: "GET|POST|PATCH", Path: "/queues"},
 		{Method: "GET|POST|PATCH", Path: "/reservations"},
 		{Method: "GET", Path: "/admin"},
 		{Method: "GET", Path: "/"},
+
+		{Method: "GET", Path: "/specialities"},
+		{Method: "GET", Path: "/specialities/{id}"},
 	}
 }
 
@@ -57,8 +62,12 @@ func NewRouter(db *sql.DB) *http.ServeMux {
 	doctorService := doctor.NewService(doctorRepo)
 	doctorHandler := doctor.NewHandler(doctorService)
 
+	specialitiesRepo := specialities.NewRepository(db)
+	specialitiesService := specialities.NewService(specialitiesRepo)
+	specialitiesHandler := specialities.NewHandler(specialitiesService)
+
 	queueRepo := queue.NewRepository(db)
-	queueService := queue.NewService(queueRepo)
+	queueService := queue.NewService(queueRepo, specialitiesService)
 	queueHandler := queue.NewHandler(queueService)
 
 	reservationsRepo := reservations.NewRepository(db)
@@ -72,12 +81,14 @@ func NewRouter(db *sql.DB) *http.ServeMux {
 	router.HandleFunc("/auth/logout", authHandler.Logout)
 	router.HandleFunc("/auth/forgot-password", authHandler.ForgotPassword)
 	router.HandleFunc("/auth/change-password", auth.AuthMiddleware(sessionStore, authHandler.ChangePassword))
-	router.HandleFunc("/auth/ping", authHandler.Ping)
-
 	router.HandleFunc("/patients/me", auth.AuthMiddleware(sessionStore, patientHandler.Profile))
 	router.HandleFunc("/doctors/me", auth.AuthMiddleware(sessionStore, doctorHandler.Profile))
-	router.HandleFunc("/queues", auth.AuthMiddleware(sessionStore, queueHandler.Queues))
+	router.HandleFunc("/doctors/availability", auth.AuthMiddleware(sessionStore, doctorHandler.SetAvailability))
+	router.HandleFunc("/queues", queueHandler.Queues)
 	router.HandleFunc("/reservations", auth.AuthMiddleware(sessionStore, reservationsHandler.Reservations))
+	router.HandleFunc("/reservations/queue/", auth.AuthMiddleware(sessionStore, reservationsHandler.ListByQueueID))
+	router.HandleFunc("/specialities", specialitiesHandler.ListAll)
+	router.HandleFunc("/specialities/", specialitiesHandler.GetByID)
 
 	adminHandler := func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("admin area"))

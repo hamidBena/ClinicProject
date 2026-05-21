@@ -35,8 +35,9 @@ func (r *Repository) GetDoctorByAccountID(accountID int) (*Doctor, error) {
 	// Get doctor-specific data
 	var address string
 	var specialityID int64
-	row := r.db.QueryRow("SELECT address, speciality_id FROM doctors WHERE account_id = ?", accountID)
-	err = row.Scan(&address, &specialityID)
+	var availability string
+	row := r.db.QueryRow("SELECT address, speciality_id, availability FROM doctors WHERE account_id = ?", accountID)
+	err = row.Scan(&address, &specialityID, &availability)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.New("doctor profile not found")
@@ -48,6 +49,7 @@ func (r *Repository) GetDoctorByAccountID(accountID int) (*Doctor, error) {
 		User:         *usr,
 		Address:      address,
 		SpecialityID: specialityID,
+		Availability: availability,
 	}, nil
 }
 
