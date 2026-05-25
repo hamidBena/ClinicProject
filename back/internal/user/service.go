@@ -44,6 +44,15 @@ func (s *Service) UpdateProfile(accountID int, req ProfileUpdateRequest) (*User,
 	if req.Username == "" {
 		req.Username = current.Username
 	}
+	if req.FirstName == "" {
+		req.FirstName = current.FirstName
+	}
+	if req.LastName == "" {
+		req.LastName = current.LastName
+	}
+	if req.Email == "" {
+		req.Email = current.Email
+	}
 	if req.PhoneNumber == "" {
 		req.PhoneNumber = current.PhoneNumber
 	}

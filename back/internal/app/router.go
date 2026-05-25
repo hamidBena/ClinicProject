@@ -2,12 +2,14 @@ package app
 
 import (
 	reservations "clinic/internal/Reservations"
+	"clinic/internal/admin"
 	"clinic/internal/auth"
 	"clinic/internal/doctor"
 	"clinic/internal/notifications"
 	"clinic/internal/patient"
 	"clinic/internal/queue"
 	"clinic/internal/specialities"
+	"clinic/internal/staff"
 	"clinic/internal/user"
 	"database/sql"
 	"errors"
@@ -74,6 +76,12 @@ func NewRouter(db *sql.DB) *http.ServeMux {
 	doctorService := doctor.NewService(doctorRepo, notificationsManager)
 	doctorHandler := doctor.NewHandler(doctorService)
 
+	staffRepo := staff.NewRepository(db, userRepo)
+	staffService := staff.NewService(staffRepo)
+	staffHandler := staff.NewHandler(staffService)
+
+	adminH := admin.NewHandler(db)
+
 	specialitiesRepo := specialities.NewRepository(db)
 	specialitiesService := specialities.NewService(specialitiesRepo)
 	specialitiesHandler := specialities.NewHandler(specialitiesService)
@@ -102,12 +110,16 @@ func NewRouter(db *sql.DB) *http.ServeMux {
 	router.HandleFunc("/patients/me", auth.AuthMiddleware(sessionStore, patientHandler.Profile))
 	router.HandleFunc("/patients/medical-file", auth.AuthMiddleware(sessionStore, patientHandler.UploadMedicalFile))
 	router.HandleFunc("/doctors/me", auth.AuthMiddleware(sessionStore, doctorHandler.Profile))
+	router.HandleFunc("/doctors", doctorHandler.ListBySpeciality)
 	router.HandleFunc("/doctors/availability", auth.AuthMiddleware(sessionStore, doctorHandler.SetAvailability))
+	router.HandleFunc("/staff/me", auth.AuthMiddleware(sessionStore, staffHandler.Profile))
 	router.HandleFunc("/queues", queueHandler.Queues)
 	router.HandleFunc("/profile/avatar", auth.AuthMiddleware(sessionStore, userHandler.UploadAvatar))
 	router.HandleFunc("/doctors/certificate", auth.AuthMiddleware(sessionStore, doctorHandler.UploadCertificate))
 	router.HandleFunc("/reservations", auth.AuthMiddleware(sessionStore, reservationsHandler.Reservations))
-	router.HandleFunc("/reservations/queue/", auth.AuthMiddleware(sessionStore, reservationsHandler.ListByQueueID))
+	router.HandleFunc("/reservations/queue/", reservationsHandler.ListByQueueID)
+	router.Handle("/reservations/staff", auth.AuthMiddleware(sessionStore, auth.RequireRoles([]string{"admin", "doctor", "staff"}, http.HandlerFunc(reservationsHandler.CreateForPatient))))
+	router.Handle("/reservations/staff/update", auth.AuthMiddleware(sessionStore, auth.RequireRoles([]string{"admin", "doctor", "staff"}, http.HandlerFunc(reservationsHandler.UpdateForStaff))))
 	router.HandleFunc("/notifications", auth.AuthMiddleware(sessionStore, notificationsHandler.Notifications))
 	router.HandleFunc("/specialities", specialitiesHandler.ListAll)
 	router.HandleFunc("/specialities/", specialitiesHandler.GetByID)
@@ -140,6 +152,132 @@ func NewRouter(db *sql.DB) *http.ServeMux {
 
 	router.HandleFunc("/Admin.html", auth.AuthMiddleware(sessionStore, auth.RequireRoles([]string{"admin"}, adminHTMLHandler)))
 	router.HandleFunc("/admin", auth.AuthMiddleware(sessionStore, auth.RequireRoles([]string{"admin"}, adminHandler)))
+	router.HandleFunc("/admin/me", auth.AuthMiddleware(sessionStore, auth.RequireRoles([]string{"admin"}, http.HandlerFunc(adminH.Me))))
+	router.HandleFunc("/admin/doctors/availability", auth.AuthMiddleware(sessionStore, auth.RequireRoles([]string{"admin"}, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodPatch:
+			adminH.SetDoctorAvailability(w, r)
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		}
+	}))))
+
+	router.HandleFunc("/admin/doctors", auth.AuthMiddleware(sessionStore, auth.RequireRoles([]string{"admin"}, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		switch r.Method {
+		case http.MethodGet:
+			adminH.ListDoctors(w, r)
+		case http.MethodPost:
+			adminH.CreateDoctor(w, r)
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		}
+	}))))
+
+	router.HandleFunc("/admin/doctors/", auth.AuthMiddleware(sessionStore, auth.RequireRoles([]string{"admin"}, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case strings.HasSuffix(r.URL.Path, "/certificates") && r.Method == http.MethodGet:
+			adminH.ListDoctorCertificates(w, r)
+		case r.Method == http.MethodPatch:
+			adminH.UpdateDoctor(w, r)
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		}
+	}))))
+
+	router.HandleFunc("/admin/staff", auth.AuthMiddleware(sessionStore, auth.RequireRoles([]string{"admin"}, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			adminH.ListStaff(w, r)
+		case http.MethodPost:
+			adminH.CreateStaff(w, r)
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		}
+	}))))
+
+	router.HandleFunc("/admin/staff/", auth.AuthMiddleware(sessionStore, auth.RequireRoles([]string{"admin"}, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodPatch:
+			adminH.UpdateStaff(w, r)
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		}
+	}))))
+
+	router.HandleFunc("/admin/patients", auth.AuthMiddleware(sessionStore, auth.RequireRoles([]string{"admin"}, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			adminH.ListPatients(w, r)
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		}
+	}))))
+
+	router.HandleFunc("/admin/accounts/", auth.AuthMiddleware(sessionStore, auth.RequireRoles([]string{"admin"}, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodPatch:
+			adminH.SetAccountBlock(w, r)
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		}
+	}))))
+
+	router.HandleFunc("/admin/certificates", auth.AuthMiddleware(sessionStore, auth.RequireRoles([]string{"admin"}, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodPost:
+			adminH.CreateCertificate(w, r)
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		}
+	}))))
+
+	router.HandleFunc("/admin/certificates/", auth.AuthMiddleware(sessionStore, auth.RequireRoles([]string{"admin"}, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodDelete:
+			adminH.DeleteCertificate(w, r)
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		}
+	}))))
+
+	router.HandleFunc("/admin/services", auth.AuthMiddleware(sessionStore, auth.RequireRoles([]string{"admin"}, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			adminH.ListServices(w, r)
+		case http.MethodPost:
+			adminH.CreateService(w, r)
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		}
+	}))))
+
+	router.HandleFunc("/admin/services/", auth.AuthMiddleware(sessionStore, auth.RequireRoles([]string{"admin"}, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodDelete:
+			adminH.DeleteService(w, r)
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		}
+	}))))
+	router.HandleFunc("/admin/specialities", auth.AuthMiddleware(sessionStore, auth.RequireRoles([]string{"admin"}, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			adminH.ListSpecialities(w, r)
+		case http.MethodPost:
+			adminH.CreateSpeciality(w, r)
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		}
+	}))))
+	router.HandleFunc("/admin/specialities/", auth.AuthMiddleware(sessionStore, auth.RequireRoles([]string{"admin"}, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodDelete:
+			adminH.DeleteSpeciality(w, r)
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		}
+	}))))
 	// Serve MedicalStaff.html only to doctors and admins
 	medicalStaffHTMLHandler := func(w http.ResponseWriter, r *http.Request) {
 		frontDir := resolveFrontDir()
@@ -163,7 +301,7 @@ func NewRouter(db *sql.DB) *http.ServeMux {
 		http.ServeContent(w, r, info.Name(), info.ModTime(), file.(io.ReadSeeker))
 	}
 
-	router.HandleFunc("/MedicalStaff.html", auth.AuthMiddleware(sessionStore, auth.RequireRoles([]string{"admin", "doctor"}, medicalStaffHTMLHandler)))
+	router.HandleFunc("/MedicalStaff.html", auth.AuthMiddleware(sessionStore, auth.RequireRoles([]string{"admin", "doctor", "staff"}, medicalStaffHTMLHandler)))
 	router.HandleFunc("/", staticFrontHandler())
 
 	return router

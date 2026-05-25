@@ -16,9 +16,13 @@ type User struct {
 }
 
 type ProfileUpdateRequest struct {
-	Username    string `json:"username"`
-	Password    string `json:"password"`
-	PhoneNumber string `json:"phone_number"`
-	Address     string `json:"address"`
-	Birthday    string `json:"birthday"`
+    Username    string `json:"username"`
+    Password    string `json:"password"`
+    FirstName   string `json:"first_name"`
+    LastName    string `json:"last_name"`
+    Email       string `json:"email"`
+    PhoneNumber string `json:"phone_number"`
+    Gender      string `json:"gender"`
+    Address     string `json:"address"`
+    Birthday    string `json:"birthday"`
 }

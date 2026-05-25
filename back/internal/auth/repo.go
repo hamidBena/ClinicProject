@@ -16,8 +16,27 @@ func NewRepository(db *sql.DB) *Repository {
 	return &Repository{db: db}
 }
 
-func (r *Repository) CreateAccount(a SignUpRequest) (int64, error) {
-	// normalize email to be case-insensitive
+func uniqueErr(err error) error {
+	if err == nil {
+		return nil
+	}
+	msg := err.Error()
+	if strings.Contains(msg, "accounts.email") {
+		return errors.New("email already exists")
+	}
+	if strings.Contains(msg, "accounts.phone_number") {
+		return errors.New("phone number already exists")
+	}
+	if strings.Contains(msg, "accounts.username") {
+		return errors.New("username already exists")
+	}
+	if strings.Contains(msg, "patients.insurance_number") {
+		return errors.New("insurance number already exists")
+	}
+	return err
+}
+
+func (r *Repository) CreateAccountAndPatient(a SignUpRequest, insuranceNumber string, chronicDiseases string) (int64, error) {
 	a.Email = strings.ToLower(strings.TrimSpace(a.Email))
 	a.Gender = strings.TrimSpace(a.Gender)
 
@@ -26,39 +45,82 @@ func (r *Repository) CreateAccount(a SignUpRequest) (int64, error) {
 		return 0, err
 	}
 
-	query := `
+	tx, err := r.db.Begin()
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+
+	result, err := tx.Exec(`
 		INSERT INTO accounts (username, first_name, last_name, phone_number, gender, address, birthday, email, password_hash)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`
-
-	result, err := r.db.Exec(query, a.Username, a.FirstName, a.LastName, a.PhoneNumber, a.Gender, a.Address, a.Birthday, a.Email, hashedPassword)
+	`, a.Username, a.FirstName, a.LastName, a.PhoneNumber, a.Gender, a.Address, a.Birthday, a.Email, hashedPassword)
 	if err != nil {
-		if err.Error() == "UNIQUE constraint failed: accounts.email" {
-			return 0, errors.New("email already exists")
-		}
+		return 0, uniqueErr(err)
+	}
+
+	accountID, err := result.LastInsertId()
+	if err != nil {
 		return 0, err
+	}
+
+	_, err = tx.Exec(`
+		INSERT INTO patients (account_id, insurance_number, chronic_diseases)
+		VALUES (?, ?, ?)
+	`, accountID, insuranceNumber, chronicDiseases)
+	if err != nil {
+		return 0, uniqueErr(err)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+
+	return accountID, nil
+}
+
+func (r *Repository) CreateAccount(a SignUpRequest) (int64, error) {
+	a.Email = strings.ToLower(strings.TrimSpace(a.Email))
+	a.Gender = strings.TrimSpace(a.Gender)
+
+	hashedPassword, err := utils.HashPassword(a.Password)
+	if err != nil {
+		return 0, err
+	}
+
+	result, err := r.db.Exec(`
+		INSERT INTO accounts (username, first_name, last_name, phone_number, gender, address, birthday, email, password_hash)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`, a.Username, a.FirstName, a.LastName, a.PhoneNumber, a.Gender, a.Address, a.Birthday, a.Email, hashedPassword)
+	if err != nil {
+		return 0, uniqueErr(err)
 	}
 
 	return result.LastInsertId()
 }
 
 func (r *Repository) CreatePatient(accountID int64, insuranceNumber string) error {
-	query := `
+	_, err := r.db.Exec(`
 		INSERT INTO patients (account_id, insurance_number)
 		VALUES (?, ?)
-	`
-
-	_, err := r.db.Exec(query, accountID, insuranceNumber)
-	return err
+	`, accountID, insuranceNumber)
+	return uniqueErr(err)
 }
 
-func (r *Repository) CreateDoctor(accountID int64, speciality_id int32, address string) error {
-	query := `
-		INSERT INTO doctors (account_id, speciality_id, address, availability)
-		VALUES (?, ?, ?, 'Available')
-	`
+func (r *Repository) CreateDoctor(accountID int64, speciality_id int32) error {
+    query := `
+        INSERT INTO doctors (account_id, speciality_id, availability)
+        VALUES (?, ?, 'Available')
+    `
+    _, err := r.db.Exec(query, accountID, speciality_id)
+    return err
+}
 
-	_, err := r.db.Exec(query, accountID, speciality_id, address)
+func (r *Repository) CreateStaff(accountID int64, post string, recruitmentDate string) error {
+	_, err := r.db.Exec(`
+        INSERT INTO medical_staff (account_id, post, recruitment_date)
+        VALUES (?, ?, ?)
+    `, accountID, post, recruitmentDate)
 	return err
 }
 
@@ -77,12 +139,12 @@ func (r *Repository) GetAccountByEmail(email string) (*Account, error) {
 	email = strings.ToLower(strings.TrimSpace(email))
 	var account Account
 	err := r.db.QueryRow(`
-		SELECT id_account, username, first_name, last_name, phone_number, COALESCE(gender, ''), COALESCE(address, ''), COALESCE(birthday, ''), email, password_hash, COALESCE(avatar_url, '')
-		FROM accounts
-		WHERE email = ?
+    	SELECT id_account, username, first_name, last_name, phone_number, COALESCE(gender, ''), COALESCE(address, ''), COALESCE(birthday, ''), email, password_hash, COALESCE(avatar_url, ''), COALESCE(is_blocked, 0)
+    	FROM accounts
+    	WHERE LOWER(email) = LOWER(?)
 	`, email).Scan(&account.ID, &account.Username, &account.FirstName,
 		&account.LastName, &account.PhoneNumber, &account.Gender, &account.Address, &account.Birthday, &account.Email,
-		&account.PasswordHash, &account.AvatarURL)
+		&account.PasswordHash, &account.AvatarURL, &account.IsBlocked)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -117,13 +179,15 @@ func (r *Repository) GetAccountByID(accountID int64) (*Account, error) {
 func (r *Repository) GetAccountRole(accountID int64) (string, error) {
 	var role string
 	err := r.db.QueryRow(`
-		SELECT 'admin' as role FROM admins WHERE account_id = ?
-		UNION
-		SELECT 'doctor' as role FROM doctors WHERE account_id = ?
-		UNION
-		SELECT 'patient' as role FROM patients WHERE account_id = ?
-		LIMIT 1
-	`, accountID, accountID, accountID).Scan(&role)
+    	SELECT 'admin' as role FROM admins WHERE account_id = ?
+    	UNION
+    	SELECT 'doctor' as role FROM doctors WHERE account_id = ?
+    	UNION
+    	SELECT 'patient' as role FROM patients WHERE account_id = ?
+    	UNION
+    	SELECT 'staff' as role FROM medical_staff WHERE account_id = ?
+    	LIMIT 1
+	`, accountID, accountID, accountID, accountID).Scan(&role)
 
 	if err != nil {
 		if err == sql.ErrNoRows {

@@ -47,25 +47,6 @@ const fallbackQueues = [
 let queueData = fallbackQueues;
 let selectedDoctorId = "all";
 
-function normalizePublicQueue(payload) {
-    if (!Array.isArray(payload)) return fallbackQueues;
-
-    return payload.map((doctor, index) => ({
-        id: String(doctor.id || doctor.doctor_id || `doctor-${index}`),
-        doctor: doctor.doctor || doctor.name || "Doctor",
-        speciality: doctor.speciality || doctor.specialty || "General care",
-        room: doctor.room || doctor.location || "Clinic room",
-        image: doctor.image || doctor.icon || "images/logo.png",
-        entries: Array.isArray(doctor.entries || doctor.queue)
-            ? (doctor.entries || doctor.queue).map((entry, entryIndex) => ({
-                position: Number(entry.position || entryIndex + 1) || entry.number || `Q-${String(entryIndex + 1).padStart(3, "0")}`,
-                time: entry.time || "--:--",
-                status: String(entry.status || "waiting").toLowerCase().replace(/\s+/g, "-")
-            }))
-            : []
-    }));
-}
-
 async function checkSession() {
     try {
         const response = await fetch(`${API_URL}/auth/me`, {
@@ -88,7 +69,6 @@ async function loadPublicQueues() {
         if (!queuesRes.ok) return fallbackQueues;
         const queues = await queuesRes.json();
 
-        // For each queue, fetch its reservations
         const enriched = await Promise.all(queues.map(async (q) => {
             let entries = [];
             try {
@@ -99,9 +79,13 @@ async function loadPublicQueues() {
                     const reservations = await resRes.json();
                     entries = reservations.map((r, i) => ({
                         position: i + 1,
-                        time: new Date(r.timedue).toLocaleTimeString("en-US", {
-                            hour: "2-digit", minute: "2-digit", hour12: false
-                        }),
+                        time: (() => {
+                            if (!r.timecreated) return "—";
+                            const d = new Date(r.timecreated);
+                            return isNaN(d.getTime())
+                                ? r.timecreated  // show raw value as fallback
+                                : d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
+                        })(),
                         status: r.status === "Waiting" ? "waiting"
                             : r.status === "Proccessing" ? "in-progress"
                                 : "finished"
@@ -111,7 +95,7 @@ async function loadPublicQueues() {
 
             return {
                 id: String(q.id),
-                doctor: q.speciality_name || "Doctor",
+                doctor: q.doctor_name ? `Dr. ${q.doctor_name}` : q.speciality_name || "Doctor",
                 speciality: q.speciality_name || "General",
                 room: "Room —",
                 image: `images/${q.speciality_name || "logo"}.png`,
@@ -173,7 +157,7 @@ function renderDoctorCards() {
                     <img src="${item.image}" alt="${item.speciality} queue icon">
                     <div>
                         <h3>${item.doctor}</h3>
-                        <p>${item.speciality} · ${item.room}</p>
+                        <p>${item.speciality}</p>
                     </div>
                 </div>
                 <div class="queue_stats" aria-label="${item.doctor} queue statistics">

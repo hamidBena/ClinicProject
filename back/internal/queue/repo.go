@@ -114,11 +114,11 @@ func (r *Repository) ListAll() ([]Queue, error) {
 	rows, err := r.db.Query(
 		`SELECT q.id_queue, q.queue_maxSize, q.queue_size, q.queue_index, q.speciality_id,
 		        COALESCE(s.name, ''),
-		        COALESCE(a.first_name || ' ' || a.last_name, '')
+		        a.first_name || ' ' || a.last_name
 		 FROM queues q
 		 LEFT JOIN specialities s ON s.id_speciality = q.speciality_id
-		 LEFT JOIN doctors d ON d.speciality_id = q.speciality_id
-		 LEFT JOIN accounts a ON a.id_account = d.account_id
+		 INNER JOIN doctors d ON d.speciality_id = q.speciality_id
+		 INNER JOIN accounts a ON a.id_account = d.account_id
 		 ORDER BY q.id_queue ASC`,
 	)
 	if err != nil {

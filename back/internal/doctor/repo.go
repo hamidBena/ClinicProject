@@ -3,7 +3,9 @@ package doctor
 import (
 	"clinic/internal/user"
 	"database/sql"
+	"encoding/json"
 	"errors"
+	"strings"
 )
 
 // Repository handles doctor profile database operations
@@ -33,26 +35,55 @@ func (r *Repository) GetDoctorByAccountID(accountID int) (*Doctor, error) {
 	}
 
 	// Get doctor-specific data
-	var address string
 	var specialityID int64
 	var availability string
+	var workingDaysRaw string
 	var certificateURL string
-	row := r.db.QueryRow("SELECT address, speciality_id, availability, COALESCE(certificate_url, '') FROM doctors WHERE account_id = ?", accountID)
-	err = row.Scan(&address, &specialityID, &availability, &certificateURL)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.New("doctor profile not found")
-		}
-		return nil, err
-	}
+	var numAgrement string
 
+	row := r.db.QueryRow(`
+    	SELECT speciality_id,
+           availability,
+           COALESCE(working_day_description, ''),
+           COALESCE(certificate_url, ''),
+           COALESCE(num_agrement, '')
+        FROM doctors
+        WHERE account_id = ?
+	`, accountID)
+
+	err = row.Scan(
+		&specialityID,
+		&availability,
+		&workingDaysRaw,
+		&certificateURL,
+		&numAgrement,
+	)
+	var workingDays []string
+	if workingDaysRaw != "" {
+		for _, d := range strings.Split(workingDaysRaw, ",") {
+			d = strings.TrimSpace(d)
+			if d != "" {
+				workingDays = append(workingDays, d)
+			}
+		}
+	}
 	return &Doctor{
 		User:           *usr,
-		Address:        address,
 		SpecialityID:   specialityID,
 		Availability:   availability,
+		WorkingDays:    workingDays,
 		CertificateURL: certificateURL,
+		NumAgrement:    numAgrement,
 	}, nil
+}
+
+// Set availability updates the doctor's availability status
+func (r *Repository) SetAvailability(accountID int, availability string) error {
+	_, err := r.db.Exec(
+		`UPDATE doctors SET availability = ? WHERE account_id = ?`,
+		availability, accountID,
+	)
+	return err
 }
 
 // UpdateDoctorProfile updates a doctor's profile data
@@ -61,31 +92,28 @@ func (r *Repository) UpdateDoctorProfile(accountID int, req ProfileUpdateRequest
 		return errors.New("invalid account id")
 	}
 
-	// Update user fields via userRepo
+	// Update user fields
 	err := r.userRepo.UpdateUserProfile(accountID, req.ProfileUpdateRequest)
 	if err != nil {
 		return err
 	}
 
-	// Build update query for doctor-specific fields
-	var query string
-	var args []interface{}
-
-	if req.Address != "" && req.SpecialityID > 0 {
-		query = "UPDATE doctors SET address = ?, speciality_id = ? WHERE account_id = ?"
-		args = []interface{}{req.Address, req.SpecialityID, accountID}
-	} else if req.Address != "" {
-		query = "UPDATE doctors SET address = ? WHERE account_id = ?"
-		args = []interface{}{req.Address, accountID}
-	} else if req.SpecialityID > 0 {
-		query = "UPDATE doctors SET speciality_id = ? WHERE account_id = ?"
-		args = []interface{}{req.SpecialityID, accountID}
-	} else {
-		// No doctor fields to update
-		return nil
+	workingDaysJSON, err := json.Marshal(req.WorkingDays)
+	if err != nil {
+		return err
 	}
 
-	_, err = r.db.Exec(query, args...)
+	_, err = r.db.Exec(`
+		UPDATE doctors
+		SET speciality_id = ?,
+		    working_days = ?
+		WHERE account_id = ?
+	`,
+		req.SpecialityID,
+		string(workingDaysJSON),
+		accountID,
+	)
+
 	return err
 }
 

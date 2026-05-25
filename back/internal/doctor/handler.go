@@ -1,15 +1,16 @@
 package doctor
 
 import (
-	"clinic/internal/auth"
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
-	"os"
-	"path/filepath"
-	"strings"
-	"time"
+    "clinic/internal/auth"
+    "database/sql"
+    "encoding/json"
+    "fmt"
+    "io"
+    "net/http"
+    "os"
+    "path/filepath"
+    "strings"
+    "time"
 )
 
 // Handler handles doctor HTTP endpoints
@@ -20,6 +21,57 @@ type Handler struct {
 // NewHandler creates a new doctor handler
 func NewHandler(service *Service) *Handler {
 	return &Handler{service: service}
+}
+
+// ListBySpeciality handles GET /doctors?speciality_id=X
+func (h *Handler) ListBySpeciality(w http.ResponseWriter, r *http.Request) {
+    specialityID := r.URL.Query().Get("speciality_id")
+
+    var rows *sql.Rows
+    var err error
+
+    query := `
+        SELECT a.id_account, a.first_name, a.last_name,
+               COALESCE(s.name, ''), COALESCE(d.availability, 'Available'),
+               COALESCE(d.working_day_description, '')
+        FROM doctors d
+        JOIN accounts a ON a.id_account = d.account_id
+        LEFT JOIN specialities s ON s.id_speciality = d.speciality_id
+        WHERE COALESCE(a.is_blocked, 0) = 0
+    `
+    if specialityID != "" {
+        query += ` AND d.speciality_id = ?`
+        rows, err = h.service.DB().Query(query, specialityID)
+    } else {
+        rows, err = h.service.DB().Query(query)
+    }
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+    defer rows.Close()
+
+    type Row struct {
+        AccountID    int    `json:"account_id"`
+        FirstName    string `json:"first_name"`
+        LastName     string `json:"last_name"`
+        Speciality   string `json:"speciality"`
+        Availability string `json:"availability"`
+        WorkingDays  string `json:"working_day_description"`
+    }
+
+    result := []Row{}
+    for rows.Next() {
+        var d Row
+        if err := rows.Scan(&d.AccountID, &d.FirstName, &d.LastName,
+            &d.Speciality, &d.Availability, &d.WorkingDays); err != nil {
+            continue
+        }
+        result = append(result, d)
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(result)
 }
 
 // Profile handles GET and PATCH for /doctors/me
@@ -65,9 +117,35 @@ func (h *Handler) Profile(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) SetAvailability(w http.ResponseWriter, r *http.Request) {
-	// only PATCH, only admin or doctor role
-	// body: { "availability": "Available" | "Unavailable" }
-	// calls service which calls repo UPDATE
+    if r.Method != http.MethodPatch {
+        http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+        return
+    }
+
+    session, ok := auth.SessionFromContext(r.Context())
+    if !ok {
+        http.Error(w, "unauthorized", http.StatusUnauthorized)
+        return
+    }
+
+    var req struct {
+        Availability string `json:"availability"`
+    }
+    if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+        http.Error(w, "invalid JSON body", http.StatusBadRequest)
+        return
+    }
+    if req.Availability != "Available" && req.Availability != "Unavailable" {
+        http.Error(w, "availability must be 'Available' or 'Unavailable'", http.StatusBadRequest)
+        return
+    }
+
+    if err := h.service.SetAvailability(int(session.AccountID), req.Availability); err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    w.WriteHeader(http.StatusNoContent)
 }
 
 // UploadCertificate allows a doctor to upload a single certificate file.

@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Medical Staff dashboard for managing patient reservations, queue updates, and doctor lists.">
+    <meta name="description"
+        content="Medical Staff dashboard for managing patient reservations, queue updates, and doctor lists.">
     <title>Medical Staff - Healthcare Management System</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
     <link rel="stylesheet" href="styles/style(MedicalStaff).css">
 </head>
+
 <body>
     <div class="dashboard-shell">
         <aside class="sidebar" aria-label="Main sidebar">
@@ -27,7 +31,8 @@
             </div>
 
             <nav class="sidebar-nav" aria-label="Dashboard navigation">
-                <button type="button" class="nav-link is-active" data-page-target="home" aria-controls="home" aria-current="page">
+                <button type="button" class="nav-link is-active" data-page-target="home" aria-controls="home"
+                    aria-current="page">
                     <span aria-hidden="true">⌂</span>
                     Home
                 </button>
@@ -63,7 +68,10 @@
                         <p>Manage patient reservations, monitor queues, and keep doctor records up to date.</p>
                     </div>
                     <div class="date-card" aria-label="Current date">
-                        <span class="date-icon" aria-hidden="true">+</span>
+                        <span class="date-icon" aria-hidden="true"
+                            style="display:flex; align-items:center; justify-content:center;">
+                            <i class="ti ti-calendar" style="font-size:1.45rem; color:white;"></i>
+                        </span>
                         <div>
                             <strong id="weekdayText">Monday</strong>
                             <span id="dateText">19 May 2026</span>
@@ -75,28 +83,28 @@
                     <article class="stat-card">
                         <span class="stat-icon stat-icon--primary">◫</span>
                         <div>
-                            <strong id="statReservations">12</strong>
+                            <strong id="statReservations">-</strong>
                             <span>Reservations today</span>
                         </div>
                     </article>
                     <article class="stat-card">
                         <span class="stat-icon stat-icon--warning">≡</span>
                         <div>
-                            <strong id="statWaiting">7</strong>
+                            <strong id="statWaiting">-</strong>
                             <span>Patients waiting</span>
                         </div>
                     </article>
                     <article class="stat-card">
                         <span class="stat-icon stat-icon--success">✔</span>
                         <div>
-                            <strong id="statDone">5</strong>
+                            <strong id="statDone">-</strong>
                             <span>Completed today</span>
                         </div>
                     </article>
                     <article class="stat-card">
                         <span class="stat-icon stat-icon--info">✦</span>
                         <div>
-                            <strong id="statDoctors">8</strong>
+                            <strong id="statDoctors">-</strong>
                             <span>Active doctors</span>
                         </div>
                     </article>
@@ -163,61 +171,117 @@
                             </div>
                         </div>
                         <dl class="info-list" id="profileInfoList">
-                            <div>
-                                <dt>Username</dt>
-                                <dd id="infoUsername">—</dd>
+                            <div><dt>Username</dt><dd id="infoUsername">—</dd></div>
+                            <div><dt>First Name</dt><dd id="infoFirstName">—</dd></div>
+                            <div><dt>Last Name</dt><dd id="infoLastName">—</dd></div>
+                            <div><dt>Email</dt><dd id="infoEmail">—</dd></div>
+                            <div><dt>Phone</dt><dd id="infoPhone">—</dd></div>
+                            <div><dt>Address</dt><dd id="infoAddress">—</dd></div>
+                            <div><dt>Birth Date</dt><dd id="infoBirthDate">—</dd></div>
+                            <div><dt>Gender</dt><dd id="infoGender">—</dd></div>
+
+                            
+                            <div id="doctorProfileFields">
+                                <div><dt>Agrement Number</dt><dd id="infoAgrementNumber">—</dd></div>
+                                <div><dt>Working Days</dt><dd id="infoWorkingDays">—</dd></div>
                             </div>
-                            <div>
-                                <dt>Email</dt>
-                                <dd id="infoEmail">—</dd>
+
+                            <div id="staffProfileFields" style="display:none;">
+                                <div><dt>Post</dt><dd id="infoPost">—</dd></div>
+                                <div><dt>Recruitment Date</dt><dd id="infoRecruitmentDate">—</dd></div>
                             </div>
-                            <div>
-                                <dt>Phone</dt>
-                                <dd id="infoPhone">—</dd>
-                            </div>
-                            <div>
-                                <dt>Role</dt>
-                                <dd>Medical Staff</dd>
-                            </div>
+
+                            <div><dt>Role</dt><dd id="infoRole">—</dd></div>
                         </dl>
+
+                        <button type="button" class="button button-primary" id="editProfileBtn">Edit profile</button>
                     </div>
 
-                    <div class="panel">
+                    <div class="panel edit-profile-panel" hidden>
                         <div class="form-header">
                             <p class="eyebrow">Edit details</p>
                             <h3>Update profile</h3>
                         </div>
                         <form id="profileForm" novalidate>
+
+                            <div class="field-group field-wide profile-image-field">
+                                <label>Profile picture</label>
+                                <div class="profile-image-editor">
+                                    <img src="" alt="Profile preview" id="profilePhotoPreview" class="profile-photo">
+                                    <div class="profile-image-actions">
+                                        <label for="profilePhotoInput" class="button button-secondary">Choose
+                                            photo</label>
+                                        <input type="file" id="profilePhotoInput" accept="image/*" hidden>
+                                        <small>JPG, PNG or WEBP</small>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="form-grid">
                                 <div class="field-group">
-                                    <label for="pfFirstName">First name</label>
-                                    <input type="text" id="pfFirstName" placeholder="First name" autocomplete="given-name">
+                                    <label for="pfUsername">Username</label>
+                                    <input type="text" id="pfUsername" placeholder="username" autocomplete="username">
+                                    <span class="field-error" id="pfUsernameErr"></span>
+                                </div>
+                                <div class="field-group">
+                                    <label for="pfFirstName">First Name</label>
+                                    <input type="text" id="pfFirstName" autocomplete="given-name">
                                     <span class="field-error" id="pfFirstNameErr"></span>
                                 </div>
                                 <div class="field-group">
-                                    <label for="pfLastName">Last name</label>
-                                    <input type="text" id="pfLastName" placeholder="Last name" autocomplete="family-name">
+                                    <label for="pfLastName">Last Name</label>
+                                    <input type="text" id="pfLastName" autocomplete="family-name">
                                     <span class="field-error" id="pfLastNameErr"></span>
                                 </div>
+
                                 <div class="field-group">
                                     <label for="pfEmail">Email</label>
-                                    <input type="email" id="pfEmail" placeholder="you@example.com" autocomplete="email">
+                                    <input type="email" id="pfEmail" autocomplete="email">
                                     <span class="field-error" id="pfEmailErr"></span>
                                 </div>
                                 <div class="field-group">
                                     <label for="pfPhone">Phone</label>
-                                    <input type="tel" id="pfPhone" placeholder="+213 555 123 456" autocomplete="tel">
+                                    <input type="tel" id="pfPhone" autocomplete="tel">
                                     <span class="field-error" id="pfPhoneErr"></span>
                                 </div>
-                                <div class="field-group field-wide">
-                                    <label for="pfPassword">New password <span style="font-weight:400;color:var(--muted)">(leave blank to keep current)</span></label>
-                                    <input type="password" id="pfPassword" placeholder="New password" autocomplete="new-password">
+                                <div class="field-group">
+                                    <label for="pfAddress">Address</label>
+                                    <input type="text" id="pfAddress" name="pfAddress">
+                                </div>
+                                <div class="field-group">
+                                    <label for="pfBirthDate">Birth Date</label>
+                                    <input type="date" id="pfBirthDate" name="pfBirthDate">
+                                </div>
+                                <div id="doctorEditFields">
+                                    <div class="field-group field-wide">
+                                        <label for="pfWorkingDays">Working Days</label>
+                                        <div class="working-days-grid">
+                                            <label><input type="checkbox" value="Sunday"> Sunday</label>
+                                            <label><input type="checkbox" value="Monday"> Monday</label>
+                                            <label><input type="checkbox" value="Tuesday"> Tuesday</label>
+                                            <label><input type="checkbox" value="Wednesday"> Wednesday</label>
+                                            <label><input type="checkbox" value="Thursday"> Thursday</label>
+                                            <label><input type="checkbox" value="Friday"> Friday</label>
+                                            <label><input type="checkbox" value="Saturday"> Saturday</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="staffEditFields" style="display:none;">
+                                    <div class="field-group">
+                                        <label for="pfPost">Post</label>
+                                        <input type="text" id="pfPost" placeholder="e.g. Head Nurse">
+                                    </div>
+                                    <div class="field-group">
+                                        <label for="pfRecruitmentDate">Recruitment Date</label>
+                                        <input type="date" id="pfRecruitmentDate">
+                                    </div>
                                 </div>
                             </div>
                             <p class="form-status" id="profileStatus" aria-live="polite"></p>
                             <div class="button-row">
-                                <button type="submit" class="button button-primary" id="saveProfileBtn">Save changes</button>
-                                <button type="button" class="button button-secondary" id="cancelProfileBtn">Cancel</button>
+                                <button type="submit" class="button button-primary" id="saveProfileBtn">Save
+                                    changes</button>
+                                <button type="button" class="button button-secondary"
+                                    id="cancelProfileBtn">Cancel</button>
                             </div>
                         </form>
                     </div>
@@ -232,14 +296,16 @@
                         <h2 id="reservationsTitle">Reservations</h2>
                         <p>Add new patient reservations and manage existing appointments.</p>
                     </div>
-                    <button type="button" class="button button-primary" id="openAddReservationBtn">+ Add reservation</button>
+                    <button type="button" class="button button-primary" id="openAddReservationBtn"
+                        data-action="open-add-reservation">+ Add reservation</button>
                 </header>
 
                 <div class="panel" style="margin-bottom:1rem;">
                     <div class="toolbar">
                         <div class="search-field">
                             <span aria-hidden="true">⌕</span>
-                            <input type="search" id="reservationSearch" placeholder="Search by patient name or doctor...">
+                            <input type="search" id="reservationSearch"
+                                placeholder="Search by patient name or doctor...">
                         </div>
                         <div class="filter-group">
                             <select id="reservationStatusFilter" aria-label="Filter by status">
@@ -290,7 +356,8 @@
                                 <span class="eyebrow">Currently serving</span>
                                 <strong id="currentPatientName">—</strong>
                             </div>
-                            <button type="button" class="button button-primary" id="nextPatientBtn">Next patient →</button>
+                            <button type="button" class="button button-primary" id="nextPatientBtn">Next patient
+                                →</button>
                         </div>
 
                         <div class="table-wrap">
@@ -300,7 +367,6 @@
                                         <th scope="col">Position</th>
                                         <th scope="col">Patient</th>
                                         <th scope="col">Time</th>
-                                        <th scope="col">Est. duration</th>
                                         <th scope="col">Status</th>
                                         <th scope="col">Action</th>
                                     </tr>
@@ -348,56 +414,42 @@
     </div>
 
     <!-- OVERLAY -->
-    <div class="overlay" id="modalOverlay"></div>
+    <div class="overlay" id="modalOverlay" hidden></div>
 
     <!-- ADD RESERVATION MODAL -->
-    <div class="modal" id="addReservationModal" role="dialog" aria-modal="true" aria-labelledby="addResTitle">
+    <div class="modal" id="addReservationModal" role="dialog" aria-modal="true" aria-labelledby="addResTitle" hidden>
         <div class="modal-header">
             <div>
                 <p class="eyebrow">New appointment</p>
-                <h2 id="addResTitle">Add patient reservation</h2>
+                <h2 id="addResTitle">Book a queue spot</h2>
             </div>
             <button type="button" class="modal-close" id="closeAddReservationBtn" aria-label="Close modal">✕</button>
         </div>
         <form id="addReservationForm" novalidate>
             <div class="form-grid">
-                <div class="field-group">
-                    <label for="resPatientFirst">Patient first name</label>
-                    <input type="text" id="resPatientFirst" placeholder="First name" required>
-                    <span class="field-error" id="resPatientFirstErr"></span>
-                </div>
-                <div class="field-group">
-                    <label for="resPatientLast">Patient last name</label>
-                    <input type="text" id="resPatientLast" placeholder="Last name" required>
-                    <span class="field-error" id="resPatientLastErr"></span>
-                </div>
-                <div class="field-group">
-                    <label for="resDoctor">Doctor</label>
-                    <select id="resDoctor" required>
-                        <option value="">Select a doctor</option>
+                <div class="field-group field-wide">
+                    <label for="resQueue">Select doctor / speciality</label>
+                    <select id="resQueue" required>
+                        <option value="">Select a queue</option>
                     </select>
-                    <span class="field-error" id="resDoctorErr"></span>
-                </div>
-                <div class="field-group">
-                    <label for="resDate">Appointment date</label>
-                    <input type="date" id="resDate" required>
-                    <span class="field-error" id="resDateErr"></span>
+                    <span class="field-error" id="resQueueErr"></span>
                 </div>
                 <div class="field-group field-wide">
-                    <label for="resNotes">Notes <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
-                    <input type="text" id="resNotes" placeholder="Any additional information...">
+                    <label for="resPatientAccountId">Patient account ID</label>
+                    <input type="number" id="resPatientAccountId" placeholder="e.g. 42" min="1" required>
+                    <span class="field-error" id="resPatientAccountIdErr"></span>
                 </div>
             </div>
             <p class="form-status" id="addResStatus" aria-live="polite"></p>
             <div class="button-row">
-                <button type="submit" class="button button-primary">Save reservation</button>
+                <button type="submit" class="button button-primary">Book spot</button>
                 <button type="button" class="button button-secondary" id="cancelAddResBtn">Cancel</button>
             </div>
         </form>
     </div>
 
     <!-- UPDATE DOCTOR STATUS MODAL -->
-    <div class="modal" id="updateDoctorModal" role="dialog" aria-modal="true" aria-labelledby="updateDocTitle">
+    <div class="modal" id="updateDoctorModal" role="dialog" aria-modal="true" aria-labelledby="updateDocTitle" hidden>
         <div class="modal-header">
             <div>
                 <p class="eyebrow">Doctor management</p>
@@ -432,7 +484,8 @@
     </div>
 
     <!-- CONFIRM DIALOG -->
-    <section class="confirm-dialog" id="cancelDialog" role="dialog" aria-modal="true" aria-labelledby="cancelDialogTitle">
+    <section class="confirm-dialog" id="cancelDialog" role="dialog" aria-modal="true"
+        aria-labelledby="cancelDialogTitle" hidden>
         <div>
             <p class="eyebrow">Confirm action</p>
             <h2 id="cancelDialogTitle">Cancel reservation</h2>
@@ -446,4 +499,5 @@
 
     <script src="js/medical-staff.js"></script>
 </body>
+
 </html>

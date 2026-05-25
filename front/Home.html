@@ -7,7 +7,80 @@
     <meta name="description"
         content="Patient dashboard for booking appointments, managing reservations, tracking queues, and reading healthcare notifications.">
     <title>Healthcare Management System</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
     <link rel="stylesheet" href="styles/style(Home).css">
+    <style>
+        .doctor-modal {
+            max-width: 540px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .doctor-modal-header {
+            display: flex;
+            flex-direction: column;
+            gap: .25rem;
+        }
+
+        #doctorList {
+            display: flex;
+            flex-direction: column;
+            gap: .75rem;
+        }
+
+        .doctor-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: .75rem 1rem;
+            border: 1px solid var(--border, #e2e8f0);
+            border-radius: .5rem;
+            background: var(--surface, #fff);
+        }
+
+        .doctor-card img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .doctor-card-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: .15rem;
+        }
+
+        .doctor-card-info strong {
+            font-size: .95rem;
+        }
+
+        .doctor-card-info span {
+            font-size: .8rem;
+            opacity: .7;
+        }
+
+        .doctor-card-info small {
+            font-size: .75rem;
+            opacity: .55;
+        }
+
+        #doctorModalStatus {
+            font-size: .875rem;
+            min-height: 1.2em;
+            color: var(--success, green);
+        }
+
+        #doctorModalStatus:empty {
+            display: none;
+        }
+    </style>
 </head>
 
 <body>
@@ -22,9 +95,9 @@
             </div>
 
             <div class="user-card" aria-label="Signed in user">
-                <img src="images/logo.png" alt="User profile avatar">
+                <img id="sidebarAvatar" src="images/Cardiology.png" alt="User profile avatar">
                 <div>
-                    <strong id="sidebarUserName">Messallem Ouail</strong>
+                    <strong id="sidebarUserName">—</strong>
                     <span>Patient</span>
                 </div>
             </div>
@@ -32,24 +105,19 @@
             <nav class="sidebar-nav" aria-label="Dashboard navigation">
                 <button type="button" class="nav-link is-active" data-page-target="home" aria-controls="home"
                     aria-current="page">
-                    <span aria-hidden="true">⌂</span>
-                    Home
+                    <span aria-hidden="true">⌂</span> Home
                 </button>
                 <button type="button" class="nav-link" data-page-target="profile" aria-controls="profile">
-                    <span aria-hidden="true">◉</span>
-                    Profile
+                    <span aria-hidden="true">◉</span> Profile
                 </button>
                 <button type="button" class="nav-link" data-page-target="reservations" aria-controls="reservations">
-                    <span aria-hidden="true">◫</span>
-                    Reservations
+                    <span aria-hidden="true">◫</span> Reservations
                 </button>
                 <button type="button" class="nav-link" data-page-target="queue" aria-controls="queue">
-                    <span aria-hidden="true">≡</span>
-                    Queue
+                    <span aria-hidden="true">≡</span> Queue
                 </button>
                 <button type="button" class="nav-link" data-page-target="notifications" aria-controls="notifications">
-                    <span aria-hidden="true">•</span>
-                    Notifications
+                    <span aria-hidden="true">•</span> Notifications
                 </button>
             </nav>
 
@@ -57,19 +125,23 @@
         </aside>
 
         <main id="mainContent" class="main-content">
+
+            <!-- ── Home ── -->
             <section id="home" class="view is-active" aria-labelledby="homeTitle">
                 <header class="page-header hero-header">
                     <div>
                         <p class="eyebrow">Welcome back</p>
-                        <h2 id="homeTitle">Welcome, <span id="username">User</span></h2>
-                        <p>Book an appointment with a specialist and track your care from one place.</p>
+                        <h2 id="homeTitle">Welcome, <span id="username">—</span></h2>
+                        <p>Click a speciality below to book an appointment with a doctor.</p>
                     </div>
-
                     <div class="date-card" aria-label="Current date">
-                        <span class="date-icon" aria-hidden="true">-</span>
+                        <span class="date-icon" aria-hidden="true"
+                            style="display:flex; align-items:center; justify-content:center;">
+                            <i class="ti ti-calendar" style="font-size:1.45rem; color:white;"></i>
+                        </span>
                         <div>
                             <strong id="weekdayText">Monday</strong>
-                            <span id="dateText">16 May 2026</span>
+                            <span id="dateText">—</span>
                         </div>
                     </div>
                 </header>
@@ -89,71 +161,7 @@
                         <p class="eyebrow">Available departments</p>
                         <h3 id="specialitiesTitle">Popular specialities</h3>
                     </div>
-
-                    <div class="speciality-grid" id="specialityGrid">
-                        <button type="button" class="speciality-card"
-                            data-specialty="cardiology heart blood vessel care">
-                            <img src="images/Cardiology.png" alt="Cardiology speciality icon">
-                            <span class="speciality-name">Cardiology</span>
-                            <span class="speciality-description">Heart and blood vessel care</span>
-                            <span class="availability-pill">8 doctors available</span>
-                        </button>
-
-                        <button type="button" class="speciality-card"
-                            data-specialty="neurology brain nervous system care">
-                            <img src="images/Neurology.png" alt="Neurology speciality icon">
-                            <span class="speciality-name">Neurology</span>
-                            <span class="speciality-description">Brain and nervous system care</span>
-                            <span class="availability-pill">6 doctors available</span>
-                        </button>
-
-                        <button type="button" class="speciality-card" data-specialty="dermatology skin hair nail care">
-                            <img src="images/Dermatology.png" alt="Dermatology speciality icon">
-                            <span class="speciality-name">Dermatology</span>
-                            <span class="speciality-description">Skin, hair and nail care</span>
-                            <span class="availability-pill">5 doctors available</span>
-                        </button>
-
-                        <button type="button" class="speciality-card"
-                            data-specialty="psychiatry mental health wellbeing">
-                            <img src="images/Psychiatry.png" alt="Psychiatry speciality icon">
-                            <span class="speciality-name">Psychiatry</span>
-                            <span class="speciality-description">Mental health and wellbeing</span>
-                            <span class="availability-pill">4 doctors available</span>
-                        </button>
-
-                        <button type="button" class="speciality-card"
-                            data-specialty="orthopedics bone joint muscle care">
-                            <img src="images/Orthopedics.png" alt="Orthopedics speciality icon">
-                            <span class="speciality-name">Orthopedics</span>
-                            <span class="speciality-description">Bone, joint and muscle care</span>
-                            <span class="availability-pill">7 doctors available</span>
-                        </button>
-
-                        <button type="button" class="speciality-card"
-                            data-specialty="dentistry dental oral health care">
-                            <img src="images/Dentistry.png" alt="Dentistry speciality icon">
-                            <span class="speciality-name">Dentistry</span>
-                            <span class="speciality-description">Dental and oral health care</span>
-                            <span class="availability-pill">9 doctors available</span>
-                        </button>
-
-                        <button type="button" class="speciality-card"
-                            data-specialty="gastroenterology digestive system care">
-                            <img src="images/Gastro.png" alt="Gastroenterology speciality icon">
-                            <span class="speciality-name">Gastroenterology</span>
-                            <span class="speciality-description">Digestive system care</span>
-                            <span class="availability-pill">3 doctors available</span>
-                        </button>
-
-                        <button type="button" class="speciality-card"
-                            data-specialty="hematology blood disorders treatment">
-                            <img src="images/Hematology.png" alt="Hematology speciality icon">
-                            <span class="speciality-name">Hematology</span>
-                            <span class="speciality-description">Blood disorders and treatment</span>
-                            <span class="availability-pill">4 doctors available</span>
-                        </button>
-                    </div>
+                    <div class="speciality-grid" id="specialityGrid"></div>
                 </section>
 
                 <section class="trust-strip" aria-label="Service guarantees">
@@ -172,6 +180,7 @@
                 </section>
             </section>
 
+            <!-- ── Profile ── -->
             <section id="profile" class="view" aria-labelledby="profileTitle" hidden>
                 <header class="page-header">
                     <div>
@@ -184,9 +193,10 @@
                 <div class="profile-layout">
                     <article class="panel profile-panel" aria-label="Profile information">
                         <div class="profile-topline">
-                            <img id="profilePhoto" class="profile-photo" src="images/Cardiology.png" alt="Patient profile photo">
+                            <img id="profilePhoto" class="profile-photo" src="images/Cardiology.png"
+                                alt="Patient profile photo">
                             <div>
-                                <h3 id="profileName">User</h3>
+                                <h3 id="profileName">—</h3>
                                 <div class="chip-row">
                                     <span class="chip chip-success">Active</span>
                                     <span class="chip">Patient</span>
@@ -197,35 +207,35 @@
                         <dl class="info-list">
                             <div>
                                 <dt>Email</dt>
-                                <dd id="displayEmail">messallem.ouail@example.com</dd>
+                                <dd id="displayEmail"></dd>
                             </div>
                             <div>
                                 <dt>Phone</dt>
-                                <dd id="displayPhone">+123 456 7890</dd>
+                                <dd id="displayPhone"></dd>
                             </div>
                             <div>
                                 <dt>Address</dt>
-                                <dd id="displayAddress">123 Main Street, City, Country</dd>
+                                <dd id="displayAddress"></dd>
                             </div>
                             <div>
                                 <dt>Insurance</dt>
-                                <dd id="displayInsurance">ABC Insurance</dd>
+                                <dd id="displayInsurance"></dd>
                             </div>
                             <div>
-                                <dt>Birthday</dt>
-                                <dd id="displayBirthday">January 1, 1990</dd>
+                                <dt>Birth Date</dt>
+                                <dd id="displayBirthday"></dd>
                             </div>
                             <div>
                                 <dt>Gender</dt>
-                                <dd>Male</dd>
+                                <dd id="displayGender"></dd>
                             </div>
                             <div>
                                 <dt>Chronic diseases</dt>
-                                <dd><span class="chip chip-warning">Asthma</span></dd>
+                                <dd><span class="chip chip-warning" id="displayChronicDiseases"></span></dd>
                             </div>
                             <div>
                                 <dt>Medical File</dt>
-                                <dd><span class="chip chip-warning">Not Found</span></dd>
+                                <dd id="displayMedicalFile"><span class="chip chip-warning">Not Found</span></dd>
                             </div>
                         </dl>
 
@@ -239,13 +249,13 @@
                         </header>
 
                         <div class="form-grid">
-
                             <div class="field-group field-wide profile-image-field">
                                 <label>Profile picture</label>
                                 <div class="profile-image-editor">
                                     <img src="" alt="Profile preview" id="profilePhotoPreview" class="profile-photo">
                                     <div class="profile-image-actions">
-                                        <label for="profilePhotoInput" class="button button-secondary">Choose photo</label>
+                                        <label for="profilePhotoInput" class="button button-secondary">Choose
+                                            photo</label>
                                         <input type="file" id="profilePhotoInput" accept="image/*" hidden>
                                         <small>JPG, PNG or WEBP</small>
                                     </div>
@@ -253,34 +263,60 @@
                             </div>
 
                             <div class="field-group">
+                                <label for="firstNameInput">First name</label>
+                                <input type="text" id="firstNameInput" name="first_name">
+                                <small class="field-error" data-error-for="firstNameInput"></small>
+                            </div>
+
+                            <div class="field-group">
+                                <label for="lastNameInput">Last name</label>
+                                <input type="text" id="lastNameInput" name="last_name">
+                                <small class="field-error" data-error-for="lastNameInput"></small>
+                            </div>
+
+                            <div class="field-group">
                                 <label for="emailInput">Email</label>
-                                <input type="email" id="emailInput" name="email" value="messallem.ouail@example.com"
-                                    required>
+                                <input type="email" id="emailInput" name="email" required>
                                 <small class="field-error" data-error-for="emailInput"></small>
                             </div>
 
                             <div class="field-group">
                                 <label for="phoneInput">Phone</label>
-                                <input type="tel" id="phoneInput" name="phone" value="+123 456 7890" required>
+                                <input type="tel" id="phoneInput" name="phone" required>
                                 <small class="field-error" data-error-for="phoneInput"></small>
                             </div>
 
                             <div class="field-group field-wide">
                                 <label for="addressInput">Address</label>
-                                <input type="text" id="addressInput" name="address" value="123 Main Street, City, Country" required>
+                                <input type="text" id="addressInput" name="address">
                                 <small class="field-error" data-error-for="addressInput"></small>
                             </div>
 
                             <div class="field-group field-wide">
                                 <label for="InsuranceInput">Insurance</label>
-                                <input type="text" id="InsuranceInput" name="insurance" value="ABC Insurance" required>
+                                <input type="text" id="InsuranceInput" name="insurance" required>
                                 <small class="field-error" data-error-for="InsuranceInput"></small>
                             </div>
 
                             <div class="field-group">
                                 <label for="birthdayInput">Birthday</label>
-                                <input type="date" id="birthdayInput" name="birthday" value="1990-01-01" required>
+                                <input type="date" id="birthdayInput" name="birthday">
                                 <small class="field-error" data-error-for="birthdayInput"></small>
+                            </div>
+
+                            <div class="field-group field-wide">
+                                <label for="chronicDiseasesInput">Chronic diseases</label>
+                                <input type="text" id="chronicDiseasesInput" name="chronic_diseases"
+                                    placeholder="e.g. Diabetes, Hypertension">
+                                <small class="field-error" data-error-for="chronicDiseasesInput"></small>
+                            </div>
+
+                            <div class="field-group field-wide">
+                                <label for="medicalFileInput">Medical file</label>
+                                <input type="file" id="medicalFileInput" name="medical_file"
+                                    accept=".pdf,.jpg,.jpeg,.png">
+                                <small>PDF or image, max 20MB</small>
+                                <small class="field-error" data-error-for="medicalFileInput"></small>
                             </div>
                         </div>
 
@@ -288,12 +324,14 @@
 
                         <div class="button-row">
                             <button type="submit" class="button button-primary">Save changes</button>
-                            <button type="button" class="button button-secondary" id="cancelProfileEditBtn">Cancel</button>
+                            <button type="button" class="button button-secondary"
+                                id="cancelProfileEditBtn">Cancel</button>
                         </div>
                     </form>
                 </div>
             </section>
 
+            <!-- ── Reservations ── -->
             <section id="reservations" class="view" aria-labelledby="reservationsTitle" hidden>
                 <header class="page-header">
                     <div>
@@ -302,67 +340,13 @@
                         <p>Your booked appointments and queue numbers.</p>
                     </div>
                 </header>
-
                 <div class="reservation-grid" id="reservationList">
                     <p class="empty-state" id="reservationEmpty" hidden>No active reservations. Book a specialist from
                         the home page.</p>
-
-                    <article class="reservation-card" data-doctor="Dr. Belfatmi Ilyes">
-                        <header>
-                            <div class="doctor-line">
-                                <img src="images/Orthopedics.png" alt="Orthopedics doctor icon">
-                                <div>
-                                    <h3>Dr. Belfatmi Ilyes</h3>
-                                    <p>Orthopedics</p>
-                                </div>
-                            </div>
-                            <span class="status-badge status-waiting">Waiting</span>
-                        </header>
-
-                        <dl class="reservation-meta">
-                            <div>
-                                <dt>Queue number</dt>
-                                <dd>#1</dd>
-                            </div>
-                            <div>
-                                <dt>Date</dt>
-                                <dd>April 20, 2026</dd>
-                            </div>
-                        </dl>
-
-                        <button type="button" class="button button-danger cancel-reservation-btn">Cancel
-                            reservation</button>
-                    </article>
-
-                    <article class="reservation-card" data-doctor="Dr. Hireche Anes">
-                        <header>
-                            <div class="doctor-line">
-                                <img src="images/Cardiology.png" alt="Cardiology doctor icon">
-                                <div>
-                                    <h3>Dr. Hireche Anes</h3>
-                                    <p>Cardiology</p>
-                                </div>
-                            </div>
-                            <span class="status-badge status-waiting">Waiting</span>
-                        </header>
-
-                        <dl class="reservation-meta">
-                            <div>
-                                <dt>Queue number</dt>
-                                <dd>#2</dd>
-                            </div>
-                            <div>
-                                <dt>Date</dt>
-                                <dd>April 20, 2026</dd>
-                            </div>
-                        </dl>
-
-                        <button type="button" class="button button-danger cancel-reservation-btn">Cancel
-                            reservation</button>
-                    </article>
                 </div>
             </section>
 
+            <!-- ── Queue ── -->
             <section id="queue" class="view" aria-labelledby="queueTitle" hidden>
                 <header class="page-header">
                     <div>
@@ -374,29 +358,15 @@
 
                 <div class="queue-layout">
                     <aside class="doctor-selector" aria-label="Select doctor queue">
-                        <button type="button" class="doctor-tab is-active" data-doctor-id="hireche">
-                            <img src="images/Cardiology.png" alt="Cardiology icon">
-                            <span>
-                                <strong>Dr. Hireche Anes</strong>
-                                <small>Cardiology</small>
-                            </span>
-                        </button>
-                        <button type="button" class="doctor-tab" data-doctor-id="belfatmi">
-                            <img src="images/Orthopedics.png" alt="Orthopedics icon">
-                            <span>
-                                <strong>Dr. Belfatmi Ilyes</strong>
-                                <small>Orthopedics</small>
-                            </span>
-                        </button>
+                        <!-- Populated by JS -->
                     </aside>
 
                     <article class="panel queue-panel">
                         <header class="queue-panel-header">
                             <div>
-                                <h3 id="queueDoctorTitle">Dr. Hireche Anes queue</h3>
+                                <h3 id="queueDoctorTitle">—</h3>
                                 <p id="queueCount">0 patients</p>
                             </div>
-
                             <div class="segmented-control" aria-label="Filter queue status">
                                 <button type="button" class="is-active" data-status-filter="all">All</button>
                                 <button type="button" data-status-filter="finished">Finished</button>
@@ -423,6 +393,7 @@
                 </div>
             </section>
 
+            <!-- ── Notifications ── -->
             <section id="notifications" class="view" aria-labelledby="notificationsTitle" hidden>
                 <header class="page-header">
                     <div>
@@ -431,31 +402,14 @@
                         <p>Recent appointment and queue updates.</p>
                     </div>
                 </header>
-
-                <div class="notification-list">
-                    <article class="notification-card">
-                        <header>
-                            <h3>Appointment reminder</h3>
-                            <time datetime="PT10M">10 min</time>
-                        </header>
-                        <p>Your cardiology appointment begins soon. Please arrive at the waiting area and keep your
-                            queue number visible.</p>
-                    </article>
-
-                    <article class="notification-card">
-                        <header>
-                            <h3>Queue update</h3>
-                            <time datetime="PT15M">15 min</time>
-                        </header>
-                        <p>Dr. Hireche Anes is currently with patient #1. Your reservation is still active.</p>
-                    </article>
-                </div>
+                <div class="notification-list"></div>
             </section>
+
         </main>
     </div>
 
+    <!-- ── Cancel reservation dialog ── -->
     <div class="overlay" id="modalOverlay" hidden></div>
-
     <section class="confirm-dialog" id="cancelDialog" role="dialog" aria-modal="true"
         aria-labelledby="cancelDialogTitle" hidden>
         <div>
@@ -467,6 +421,20 @@
             <button type="button" class="button button-danger" id="confirmCancelBtn">Yes, cancel</button>
             <button type="button" class="button button-secondary" id="closeCancelDialogBtn">No, keep it</button>
         </div>
+    </section>
+
+    <!-- ── Doctor booking modal ── -->
+    <div class="overlay" id="doctorModalOverlay" hidden></div>
+    <section class="confirm-dialog doctor-modal" id="doctorModal" role="dialog" aria-modal="true"
+        aria-labelledby="doctorModalTitle" hidden>
+        <div class="doctor-modal-header">
+            <p class="eyebrow">Book appointment</p>
+            <h2 id="doctorModalTitle">Available doctors</h2>
+        </div>
+        <div id="doctorList"></div>
+        <p id="doctorModalEmpty" class="empty-state" hidden>No doctors available for this speciality.</p>
+        <p id="doctorModalStatus"></p>
+        <button type="button" class="button button-secondary" id="closeDoctorModalBtn">Close</button>
     </section>
 
     <script src="js/home.js"></script>

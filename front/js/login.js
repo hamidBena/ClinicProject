@@ -41,6 +41,9 @@ async function checkSession() {
         else if (role === "doctor") {
             window.location.href = "MedicalStaff.html";
         }
+        else if (role === "staff") {
+            window.location.href = "MedicalStaff.html";
+        }
         else if (role === "patient") {
             window.location.href = "Home.html";
         }
@@ -88,6 +91,8 @@ async function handleLogin(event) {
         if (role === "admin") {
             window.location.href = "Admin.html";
         } else if (role === "doctor") {
+            window.location.href = "MedicalStaff.html";
+        } else if (role === "staff") {
             window.location.href = "MedicalStaff.html";
         } else if (role === "patient") {
             window.location.href = "Home.html";

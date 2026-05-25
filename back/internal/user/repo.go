@@ -46,13 +46,23 @@ func (r *Repository) GetUserByAccountID(accountID int) (*User, error) {
 }
 
 func (r *Repository) UpdateUserProfile(accountID int, update ProfileUpdateRequest) error {
-	query := `
-		UPDATE accounts
-		SET username = ?, phone_number = ?, address = ?, birthday = ?
-		WHERE id_account = ?
-	`
-	_, err := r.db.Exec(query, update.Username, update.PhoneNumber, update.Address, update.Birthday, accountID)
-	return err
+    query := `
+        UPDATE accounts
+        SET username = ?, first_name = ?, last_name = ?, email = ?,
+            phone_number = ?, address = ?, birthday = ?
+        WHERE id_account = ?
+    `
+    _, err := r.db.Exec(query,
+        update.Username,
+        update.FirstName,
+        update.LastName,
+        update.Email,
+        update.PhoneNumber,
+        update.Address,
+        update.Birthday,
+        accountID,
+    )
+    return err
 }
 
 // UpdateAvatarURL sets the avatar URL for the given account

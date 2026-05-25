@@ -12,21 +12,39 @@ document.addEventListener("DOMContentLoaded", () => {
     const emailInput = document.getElementById("email");
     const phoneNumberInput = document.getElementById("phone_number");
     const insuranceNumberInput = document.getElementById("insurance_number");
+    const genderInput = document.getElementById("gender");
+    const birthdayInput = document.getElementById("birthday");
+    const addressInput = document.getElementById("address");
+    const chronicDiseasesInput = document.getElementById("chronic_diseases");
+    const medicalFileInput = document.getElementById("medical_file");
     const passwordInput = document.getElementById("password");
     const confirmPasswordInput = document.getElementById("confirm_password");
     const errorMsg = document.getElementById("errorMsg");
     const successMsg = document.getElementById("successMsg");
     const signupBtn = document.getElementById("signupBtn");
-    const fileInput = document.getElementById("profile_photo");
+    const photoFileInput = document.getElementById("profile_photo");
     const fileName = document.getElementById("fileName");
     const pfpPreview = document.getElementById("pfpPreview");
+    const medicalFileName = document.getElementById("medicalFileName");
     let selectedProfilePhoto = null;
+    let selectedMedicalFile = null;
 
-    pfpPreview.src = "images/Cardiology.png";
+    pfpPreview.src = "images/user.png";
     fileName.textContent = "No file selected";
 
-    fileInput.addEventListener("change", () => {
-        const file = fileInput.files[0];
+    medicalFileInput.addEventListener("change", () => {
+        const file = medicalFileInput.files[0];
+        selectedMedicalFile = file || null;
+
+        if (!file) {
+            medicalFileName.textContent = "No file selected";
+            return;
+        }
+        medicalFileName.textContent = file.name;
+    });
+
+    photoFileInput.addEventListener("change", () => {
+        const file = photoFileInput.files[0];
         selectedProfilePhoto = file || null;
 
         if (!file) {
@@ -87,23 +105,23 @@ document.addEventListener("DOMContentLoaded", () => {
         return input ? input.value.trim() : "";
     }
 
-    // ── Validation (manual — no browser pop-ups) ──────────────
+    // ── Validation ────────────────────────────
     function validate() {
         if (!val(usernameInput)) { showError("Username is required."); return false; }
         if (val(usernameInput).length < 5) { showError("Username must be at least 5 characters."); return false; }
         if (!val(firstNameInput)) { showError("First name is required."); return false; }
         if (!val(lastNameInput)) { showError("Last name is required."); return false; }
         if (!val(emailInput)) { showError("Email address is required."); return false; }
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val(emailInput))) {
-            showError("Enter a valid email address."); return false;
-        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val(emailInput))) { showError("Enter a valid email address."); return false; }
         if (!val(phoneNumberInput)) { showError("Phone number is required."); return false; }
+        if (!val(insuranceNumberInput)) { showError("Insurance number is required."); return false; }
+        if (!val(birthdayInput)) { showError("Date of birth is required."); return false; }
+        if (!val(addressInput)) { showError("Address is required."); return false; }
+        if (!val(genderInput)) { showError("Gender is required."); return false; }
         if (!val(passwordInput)) { showError("Password is required."); return false; }
         if (val(passwordInput).length < 6) { showError("Password must be at least 6 characters."); return false; }
         if (val(passwordInput).includes(" ")) { showError("Password cannot contain spaces."); return false; }
-        if (passwordInput.value !== confirmPasswordInput.value) {
-            showError("Passwords do not match."); return false;
-        }
+        if (passwordInput.value !== confirmPasswordInput.value) { showError("Passwords do not match."); return false; }
         return true;
     }
 
@@ -131,6 +149,10 @@ document.addEventListener("DOMContentLoaded", () => {
             email: val(emailInput),
             phone_number: val(phoneNumberInput),
             insurance_number: val(insuranceNumberInput),
+            gender: val(genderInput),
+            birthday: val(birthdayInput),
+            address: val(addressInput),
+            chronic_diseases: val(chronicDiseasesInput), // ← add this
             password: passwordInput.value,
             role: "patient",
         };
@@ -181,6 +203,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (!avatarRes.ok) {
                     throw new Error("Account created, but profile photo upload failed.");
+                }
+            }
+
+            if (selectedMedicalFile) {
+                const medicalFormData = new FormData();
+                medicalFormData.append("file", selectedMedicalFile);
+
+                const medicalRes = await fetch(`${API_URL}/patients/medical-file`, {
+                    method: "POST",
+                    credentials: "include",
+                    body: medicalFormData,
+                });
+
+                if (!medicalRes.ok) {
+                    throw new Error("Account created, but medical file upload failed.");
                 }
             }
 

@@ -24,16 +24,13 @@
             <div class="introduction">
                 <p class="eyebrow">Create your account</p>
                 <h1>Start with the right <span>care profile</span></h1>
-                <p>
-                    Register as a patient to book appointments and track queue status, or register
-                    as a doctor to manage your speciality, clinic address, and daily sessions.
-                </p>
+                <p>Register as a patient to book appointments and track queue status.</p>
             </div>
 
             <div class="welcome_metrics" aria-label="Registration highlights">
                 <article>
-                    <strong>2</strong>
-                    <span>account types</span>
+                    <strong>Private</strong>
+                    <span>zero third-party tracking</span>
                 </article>
                 <article>
                     <strong>Secure</strong>
@@ -72,8 +69,7 @@
                             <input type="file" name="profile_photo" id="profile_photo" accept="image/*" hidden>
 
                             <div class="pfp-preview-wrapper">
-                                <img id="pfpPreview" src="images/default-user.png" alt="Profile preview"
-                                    class="pfp-preview">
+                                <img id="pfpPreview" src="images/user.png" alt="Profile preview" class="pfp-preview">
                             </div>
 
                             <label for="profile_photo" class="file-upload">
@@ -115,12 +111,12 @@
                         <div class="inputs">
                             <label for="insurance_number">Insurance number</label>
                             <input type="text" name="insurance_number" id="insurance_number"
-                                placeholder="Insurance number">
+                                placeholder="Insurance number" required>
                         </div>
 
                         <div class="inputs">
                             <label for="gender">Gender</label>
-                            <select name="gender" id="gender">
+                            <select name="gender" id="gender" required>
                                 <option value="">Select gender</option>
                                 <option value="male">Male</option>
                                 <option value="female">Female</option>
@@ -129,13 +125,29 @@
 
                         <div class="inputs">
                             <label for="birthday">Date of birth</label>
-                            <input type="date" name="birthday" id="birthday" autocomplete="bday">
+                            <input type="date" name="birthday" id="birthday" autocomplete="bday" required>
                         </div>
 
                         <div class="inputs" style="grid-column: 1 / -1;">
                             <label for="address">Address</label>
                             <input type="text" name="address" id="address" placeholder="Street, City, Wilaya"
-                                autocomplete="street-address">
+                                autocomplete="street-address" required>
+                        </div>
+
+                        <div class="inputs" style="grid-column: 1 / -1;">
+                            <label for="chronic_diseases">Chronic diseases <span style="font-weight:400;opacity:.7">(optional)</span></label>
+                            <input type="text" name="chronic_diseases" id="chronic_diseases" placeholder="e.g. Diabetes, Hypertension, Asthma" autocomplete="off">
+                        </div>
+
+                        <div class="inputs" style="grid-column: 1 / -1;">
+                            <label>Medical File</label>
+
+                            <input type="file" name="medical_file" id="medical_file" accept="image/*,application/pdf"
+                                hidden>
+                            <label for="medical_file" class="file-upload">
+                                <span class="file-upload-btn">Choose file</span>
+                                <span class="file-upload-text" id="medicalFileName">No file selected</span>
+                            </label>
                         </div>
 
                         <div class="inputs">

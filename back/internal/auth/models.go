@@ -13,6 +13,7 @@ type Account struct {
 	PasswordHash string
 	Role         string `json:"role"`
 	AvatarURL    string `json:"avatar_url,omitempty"`
+	IsBlocked    bool
 }
 
 type SignUpRequest struct {
@@ -31,6 +32,7 @@ type SignUpRequest struct {
 type SignUpRequestPatient struct {
 	SignUpRequest
 	InsuranceNumber string `json:"insurance_number"`
+	ChronicDiseases string `json:"chronic_diseases"`
 }
 
 type SignUpRequestDoctor struct {

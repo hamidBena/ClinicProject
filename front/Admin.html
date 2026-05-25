@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Admin dashboard for managing doctors, staff, and patient accounts.">
     <title>Admin - Healthcare Management System</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
     <link rel="stylesheet" href="styles/style(Admin).css">
 </head>
+
 <body>
     <div class="dashboard-shell">
 
@@ -53,9 +56,13 @@
                     <span class="nav-icon" aria-hidden="true">✎</span>
                     Certificates
                 </button>
+                <button type="button" class="nav-link" data-page="specialities">
+                    <span class="nav-icon" aria-hidden="true">✦</span>
+                    Specialities
+                </button>
             </nav>
 
-            <a class="logout-link" href="Welcome.html">Logout</a>
+            <a class="logout-link" id="logoutBtn" href="Welcome.html">Logout</a>
         </aside>
 
         <!-- MAIN -->
@@ -70,7 +77,10 @@
                         <p>Manage doctors, staff accounts, and patient records across the system.</p>
                     </div>
                     <div class="date-card">
-                        <span class="date-icon" aria-hidden="true">⌂</span>
+                        <span class="date-icon" aria-hidden="true"
+                            style="display:flex; align-items:center; justify-content:center;">
+                            <i class="ti ti-calendar" style="font-size:1.45rem; color:white;"></i>
+                        </span>
                         <div>
                             <strong id="weekdayText">—</strong>
                             <span id="dateText">—</span>
@@ -341,7 +351,8 @@
                         <h2>Certificates</h2>
                         <p>View and manage doctor certificates and credentials.</p>
                     </div>
-                    <button type="button" class="button button-primary" data-action="add-certificate">+ Add certificate</button>
+                    <button type="button" class="button button-primary" data-action="add-certificate">+ Add
+                        certificate</button>
                 </header>
 
                 <div class="panel toolbar-panel">
@@ -373,11 +384,49 @@
                 </div>
             </section>
 
+            <!-- SPECIALITIES -->
+            <section id="specialities" class="view">
+                <header class="page-header">
+                    <div>
+                        <p class="eyebrow">Medical departments</p>
+                        <h2>Specialities</h2>
+                        <p>Add and manage the clinic's medical specialities.</p>
+                    </div>
+                    <button type="button" class="button button-primary" data-action="add-speciality">+ Add
+                        speciality</button>
+                </header>
+
+                <div class="panel toolbar-panel">
+                    <div class="toolbar">
+                        <div class="search-field">
+                            <span aria-hidden="true">⌕</span>
+                            <input type="search" id="specialitySearch" placeholder="Search specialities...">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-panel panel">
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Description</th>
+                                    <th scope="col">Doctors</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="specialityTableBody"></tbody>
+                        </table>
+                    </div>
+                    <p class="empty-state" id="specialityEmpty">No specialities found.</p>
+                </div>
+            </section>
         </main>
     </div>
 
     <!-- OVERLAY -->
-    <div class="overlay" id="modalOverlay"></div>
+    <div class="overlay" id="modalOverlay" hidden></div>
 
     <!-- ADD DOCTOR MODAL -->
     <div class="modal" id="addDoctorModal" role="dialog" aria-modal="true" aria-labelledby="addDoctorTitle">
@@ -390,6 +439,11 @@
         </div>
         <form id="addDoctorForm" novalidate>
             <div class="form-grid">
+                <div class="field-group">
+                    <label for="docUsername">Username</label>
+                    <input type="text" id="docUsername" placeholder="Choose a username" required>
+                    <span class="field-error" id="docUsernameErr"></span>
+                </div>
                 <div class="field-group">
                     <label for="docFirst">First name</label>
                     <input type="text" id="docFirst" placeholder="First name" required>
@@ -409,6 +463,18 @@
                     <label for="docPhone">Phone</label>
                     <input type="tel" id="docPhone" placeholder="+213 555 000 000" required>
                     <span class="field-error" id="docPhoneErr"></span>
+                </div>
+                <div class="field-group">
+                    <label for="docGender">Gender</label>
+                    <select id="docGender">
+                        <option value="">Select gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label for="docBirthday">Birth date</label>
+                    <input type="date" id="docBirthday">
                 </div>
                 <div class="field-group">
                     <label for="docSpeciality">Speciality</label>
@@ -440,9 +506,16 @@
                     <span class="field-error" id="docRecruitmentDateErr"></span>
                 </div>
                 <div class="field-group field-wide">
-                    <label for="docWorkingDays">Working days & hours</label>
-                    <input type="text" id="docWorkingDays" placeholder="e.g. Mon–Fri, 08:00–16:00">
-                    <span class="field-error" id="docWorkingDaysErr"></span>
+                    <label>Working days</label>
+                    <div class="working-days-grid">
+                        <label><input type="checkbox" name="docWorkingDays" value="Sunday"> Sunday</label>
+                        <label><input type="checkbox" name="docWorkingDays" value="Monday"> Monday</label>
+                        <label><input type="checkbox" name="docWorkingDays" value="Tuesday"> Tuesday</label>
+                        <label><input type="checkbox" name="docWorkingDays" value="Wednesday"> Wednesday</label>
+                        <label><input type="checkbox" name="docWorkingDays" value="Thursday"> Thursday</label>
+                        <label><input type="checkbox" name="docWorkingDays" value="Friday"> Friday</label>
+                        <label><input type="checkbox" name="docWorkingDays" value="Saturday"> Saturday</label>
+                    </div>
                 </div>
                 <div class="field-group field-wide">
                     <label for="docPassword">Password</label>
@@ -495,6 +568,14 @@
                     <span class="field-error" id="stPhoneErr"></span>
                 </div>
                 <div class="field-group">
+                    <label for="stGender">Gender</label>
+                    <select id="stGender">
+                        <option value="">Select gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+                <div class="field-group">
                     <label for="stPassword">Password</label>
                     <input type="password" id="stPassword" placeholder="Set a password" required>
                     <span class="field-error" id="stPasswordErr"></span>
@@ -530,6 +611,11 @@
             <input type="hidden" id="editDoctorId">
             <div class="form-grid">
                 <div class="field-group">
+                    <label for="editDocUsername">Username</label>
+                    <input type="text" id="editDocUsername" placeholder="Username">
+                    <span class="field-error" id="editDocUsernameErr"></span>
+                </div>
+                <div class="field-group">
                     <label for="editDocFirst">First name</label>
                     <input type="text" id="editDocFirst" required>
                     <span class="field-error" id="editDocFirstErr"></span>
@@ -562,6 +648,10 @@
                     </select>
                 </div>
                 <div class="field-group">
+                    <label for="editDocService">Service</label>
+                    <select id="editDocService"></select>
+                </div>
+                <div class="field-group">
                     <label for="editDocClinic">Clinic address</label>
                     <input type="text" id="editDocClinic">
                 </div>
@@ -574,14 +664,87 @@
                     <input type="date" id="editDocRecruitmentDate">
                 </div>
                 <div class="field-group field-wide">
-                    <label for="editDocWorkingDays">Working days & hours</label>
-                    <input type="text" id="editDocWorkingDays" placeholder="e.g. Mon–Fri, 08:00–16:00">
+                    <label for="editDocAvailability">Availability</label>
+                    <select id="editDocAvailability">
+                        <option value="Available">Available</option>
+                        <option value="Unavailable">Unavailable</option>
+                    </select>
+                </div>
+                <div class="field-group field-wide">
+                    <label>Working days</label>
+                    <div class="working-days-grid" id="editDocWorkingDaysGrid">
+                        <label><input type="checkbox" name="editDocWorkingDays" value="Sunday"> Sunday</label>
+                        <label><input type="checkbox" name="editDocWorkingDays" value="Monday"> Monday</label>
+                        <label><input type="checkbox" name="editDocWorkingDays" value="Tuesday"> Tuesday</label>
+                        <label><input type="checkbox" name="editDocWorkingDays" value="Wednesday"> Wednesday</label>
+                        <label><input type="checkbox" name="editDocWorkingDays" value="Thursday"> Thursday</label>
+                        <label><input type="checkbox" name="editDocWorkingDays" value="Friday"> Friday</label>
+                        <label><input type="checkbox" name="editDocWorkingDays" value="Saturday"> Saturday</label>
+                    </div>
                 </div>
             </div>
             <p class="form-status" id="editDoctorStatus" aria-live="polite"></p>
             <div class="button-row">
                 <button type="submit" class="button button-primary">Save changes</button>
                 <button type="button" class="button button-secondary" data-close="editDoctorModal">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- EDIT STAFF MODAL -->
+    <div class="modal" id="editStaffModal" role="dialog" aria-modal="true" aria-labelledby="editStaffTitle">
+        <div class="modal-header">
+            <div>
+                <p class="eyebrow">Edit staff</p>
+                <h2 id="editStaffTitle">Update staff</h2>
+            </div>
+            <button type="button" class="modal-close" data-close="editStaffModal" aria-label="Close">✕</button>
+        </div>
+        <form id="editStaffForm" novalidate>
+            <input type="hidden" id="editStaffId">
+            <div class="form-grid">
+                <div class="field-group">
+                    <label for="editStUsername">Username</label>
+                    <input type="text" id="editStUsername">
+                    <span class="field-error" id="editStUsernameErr"></span>
+                </div>
+                <div class="field-group">
+                    <label for="editStFirst">First name</label>
+                    <input type="text" id="editStFirst" required>
+                    <span class="field-error" id="editStFirstErr"></span>
+                </div>
+                <div class="field-group">
+                    <label for="editStLast">Last name</label>
+                    <input type="text" id="editStLast" required>
+                    <span class="field-error" id="editStLastErr"></span>
+                </div>
+                <div class="field-group">
+                    <label for="editStEmail">Email</label>
+                    <input type="email" id="editStEmail" required>
+                    <span class="field-error" id="editStEmailErr"></span>
+                </div>
+                <div class="field-group">
+                    <label for="editStPhone">Phone</label>
+                    <input type="tel" id="editStPhone">
+                    <span class="field-error" id="editStPhoneErr"></span>
+                </div>
+                <div class="field-group">
+                    <label for="editStPost">Post</label>
+                    <input type="text" id="editStPost" placeholder="e.g. Nurse">
+                </div>
+                <div class="field-group">
+                    <label for="editStService">Service</label>
+                    <select id="editStService"></select>
+                </div>
+                <div class="field-group">
+                    <label for="editStRecruitmentDate">Recruitment date</label>
+                    <input type="date" id="editStRecruitmentDate">
+                </div>
+            </div>
+            <p class="form-status" id="editStaffStatus" aria-live="polite"></p>
+            <div class="button-row">
+                <button type="submit" class="button button-primary">Save changes</button>
+                <button type="button" class="button button-secondary" data-close="editStaffModal">Cancel</button>
             </div>
         </form>
     </div>
@@ -657,6 +820,48 @@
         </form>
     </div>
 
+    <!-- ADD SPECIALITY MODAL -->
+    <div class="modal" id="addSpecialityModal" role="dialog" aria-modal="true" aria-labelledby="addSpecialityTitle">
+        <div class="modal-header">
+            <div>
+                <p class="eyebrow">New speciality</p>
+                <h2 id="addSpecialityTitle">Add speciality</h2>
+            </div>
+            <button type="button" class="modal-close" data-close="addSpecialityModal" aria-label="Close">✕</button>
+        </div>
+        <form id="addSpecialityForm" novalidate>
+            <div class="form-grid">
+                <div class="field-group field-wide">
+                    <label for="specialityName">Speciality name</label>
+                    <input type="text" id="specialityName" placeholder="e.g. Cardiology" required>
+                    <span class="field-error" id="specialityNameErr"></span>
+                </div>
+                <div class="field-group field-wide">
+                    <label for="specialityDesc">Description <span
+                            style="font-weight:400;opacity:.7">(optional)</span></label>
+                    <input type="text" id="specialityDesc" placeholder="Brief description of the speciality">
+                </div>
+            </div>
+            <p class="form-status" id="addSpecialityStatus" aria-live="polite"></p>
+            <div class="button-row">
+                <button type="submit" class="button button-primary">Add speciality</button>
+                <button type="button" class="button button-secondary" data-close="addSpecialityModal">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- DOCTOR CERTIFICATES MODAL -->
+    <div class="modal" id="doctorCertsModal" role="dialog" aria-modal="true" aria-labelledby="certModalTitle">
+        <div class="modal-header">
+            <div>
+                <p class="eyebrow">Doctor credentials</p>
+                <h2 id="certModalTitle">Certificates — <span id="certModalDoctorName"></span></h2>
+            </div>
+            <button type="button" class="modal-close" data-close="doctorCertsModal" aria-label="Close">✕</button>
+        </div>
+        <div id="certModalBody"></div>
+    </div>
+
     <!-- CONFIRM DIALOG -->
     <div class="confirm-dialog" id="confirmDialog" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
         <p class="eyebrow" id="confirmEyebrow">Confirm action</p>
@@ -668,6 +873,8 @@
         </div>
     </div>
 
+
     <script src="js/admin.js"></script>
 </body>
+
 </html>

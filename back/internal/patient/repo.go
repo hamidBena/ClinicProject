@@ -26,13 +26,13 @@ func (r *Repository) GetPatientByAccountID(accountID int) (*Patient, error) {
 	}
 
 	var insuranceNumber sql.NullString
+	var chronicDiseases sql.NullString
 	var medicalFileURL sql.NullString
 
 	err = r.db.QueryRow(`
-		SELECT insurance_number, COALESCE(medical_file_url, '')
-		FROM patients
-		WHERE account_id = ?
-	`, accountID).Scan(&insuranceNumber, &medicalFileURL)
+    	SELECT insurance_number, chronic_diseases, COALESCE(medical_file_url, '')
+    	FROM patients WHERE account_id = ?
+	`, accountID).Scan(&insuranceNumber, &chronicDiseases, &medicalFileURL)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.New("patient not found")
@@ -43,6 +43,7 @@ func (r *Repository) GetPatientByAccountID(accountID int) (*Patient, error) {
 	return &Patient{
 		User:            *u,
 		InsuranceNumber: insuranceNumber.String,
+		ChronicDiseases: chronicDiseases.String,
 		MedicalFileURL:  medicalFileURL.String,
 	}, nil
 }
@@ -54,10 +55,10 @@ func (r *Repository) UpdatePatientProfile(accountID int, update ProfileUpdateReq
 	}
 
 	_, err = r.db.Exec(`
-		UPDATE patients
-		SET insurance_number = ?
-		WHERE account_id = ?
-	`, update.InsuranceNumber, accountID)
+    	UPDATE patients
+    	SET insurance_number = ?, chronic_diseases = ?
+    	WHERE account_id = ?
+	`, update.InsuranceNumber, update.ChronicDiseases, accountID)
 	return err
 }
 

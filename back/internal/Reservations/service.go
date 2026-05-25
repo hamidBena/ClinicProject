@@ -95,3 +95,14 @@ func (s *Service) Update(accountID int64, req ReservationUpdateRequest) (*Reserv
 
 	return s.repo.GetByID(req.ID)
 }
+
+func (s *Service) UpdateByStaff(req ReservationUpdateRequest) error {
+    if req.ID <= 0 {
+        return errors.New("invalid reservation id")
+    }
+    current, err := s.repo.GetByID(req.ID)
+    if err != nil {
+        return err
+    }
+    return s.repo.Update(current.AccountID, req)
+}

@@ -1,10 +1,10 @@
 package doctor
 
 import (
-	"errors"
-	"strings"
-
-	"clinic/internal/notifications"
+    "database/sql"
+    "errors"
+    "strings"
+    "clinic/internal/notifications"
 )
 
 // Service handles doctor profile business logic
@@ -44,6 +44,11 @@ func (s *Service) GetByAccountID(accountID int) (*Doctor, error) {
 	return s.repo.GetDoctorByAccountID(accountID)
 }
 
+// SetAvailability updates the doctor's availability status
+func (s *Service) SetAvailability(accountID int, availability string) error {
+	return s.repo.SetAvailability(accountID, availability)
+}
+
 // UpdateProfile updates a doctor's profile
 func (s *Service) UpdateProfile(accountID int, req ProfileUpdateRequest) (*Doctor, error) {
 	if accountID <= 0 {
@@ -60,11 +65,23 @@ func (s *Service) UpdateProfile(accountID int, req ProfileUpdateRequest) (*Docto
 	if req.Username == "" {
 		req.Username = current.Username
 	}
+	if req.FirstName == "" {
+		req.FirstName = current.FirstName
+	}
+	if req.LastName == "" {
+		req.LastName = current.LastName
+	}
+	if req.Email == "" {
+		req.Email = current.Email
+	}
 	if req.PhoneNumber == "" {
 		req.PhoneNumber = current.PhoneNumber
 	}
 	if req.Address == "" {
 		req.Address = current.Address
+	}
+	if req.Birthday == "" {
+		req.Birthday = current.Birthday
 	}
 	if req.SpecialityID == 0 {
 		req.SpecialityID = current.SpecialityID
@@ -94,4 +111,8 @@ func (s *Service) UpdateProfile(accountID int, req ProfileUpdateRequest) (*Docto
 
 	// Refetch and return
 	return s.repo.GetDoctorByAccountID(accountID)
+}
+
+func (s *Service) DB() *sql.DB {
+    return s.repo.db
 }

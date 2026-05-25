@@ -26,13 +26,12 @@ func (s *Service) RegisterPatient(request SignUpRequestPatient) error {
 		return err
 	}
 
-	accountID, err := s.repo.CreateAccount(request.SignUpRequest)
+	// Single atomic transaction: if anything fails, nothing is saved.
+	accountID, err := s.repo.CreateAccountAndPatient(request.SignUpRequest, request.InsuranceNumber, request.ChronicDiseases)
 	if err != nil {
 		return err
 	}
-	if err := s.repo.CreatePatient(accountID, request.InsuranceNumber); err != nil {
-		return err
-	}
+
 	if s.notifier != nil {
 		_ = s.notifier.Notify(accountID, "Welcome to ClinicProject. Your patient account is ready.")
 	}
@@ -58,7 +57,7 @@ func (s *Service) RegisterDoctor(request SignUpRequestDoctor) error {
 	if err != nil {
 		return err
 	}
-	if err := s.repo.CreateDoctor(accountID, request.Speciality_id, request.Address); err != nil {
+	if err := s.repo.CreateDoctor(accountID, request.Speciality_id); err != nil {
 		return err
 	}
 	if s.notifier != nil {
@@ -68,9 +67,14 @@ func (s *Service) RegisterDoctor(request SignUpRequestDoctor) error {
 }
 
 func (s *Service) Login(email, password string) (*Account, error) {
+	email = strings.ToLower(strings.TrimSpace(email))
 	account, err := s.repo.GetAccountByEmail(email)
 	if err != nil {
 		return nil, err
+	}
+
+	if account.IsBlocked {
+		return nil, errors.New("your account has been blocked. please contact the administrator")
 	}
 
 	if !s.repo.VerifyPassword(account.PasswordHash, password) {

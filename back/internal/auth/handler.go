@@ -25,6 +25,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	type registerPayload struct {
 		SignUpRequest
 		InsuranceNumber string `json:"insurance_number"`
+		ChronicDiseases string `json:"chronic_diseases"`
 		Speciality_id   int32  `json:"speciality_id"`
 		DoctorAddress   string `json:"doctor_address"`
 	}
@@ -45,6 +46,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	case "patient":
 		request := SignUpRequestPatient{SignUpRequest: payload.SignUpRequest}
 		request.InsuranceNumber = strings.TrimSpace(payload.InsuranceNumber)
+		request.ChronicDiseases = strings.TrimSpace(payload.ChronicDiseases)
 		if request.InsuranceNumber == "" {
 			http.Error(w, "insurance_number is required for patient", http.StatusBadRequest)
 			return
